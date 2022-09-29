@@ -1,14 +1,23 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Security\TwoFactor\Provider;
+namespace jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
 use jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\AuthenticationContextInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorProviderInterface;
 
-class TwoFactorProvider implements TwoFactorProviderInterface
+final class TwoFactorProvider implements TwoFactorProviderInterface
 {
+    private WebauthnFormRenderer $formRenderer;
+    private WebauthnAuthenticatorInterface $authenticator;
+
+    public function __construct(WebauthnFormRenderer $formRenderer, WebauthnAuthenticatorInterface $authenticator)
+    {
+        $this->formRenderer = $formRenderer;
+        $this->authenticator = $authenticator;
+    }
+
 
     public function beginAuthentication(AuthenticationContextInterface $context): bool
     {
@@ -18,19 +27,27 @@ class TwoFactorProvider implements TwoFactorProviderInterface
         return $user instanceof TwoFactorInterface && $user->isWebAuthnAuthenticatorEnabled();
     }
 
+    public function validateAuthenticationCode(object $user, string $authenticationCode): bool
+    {
+        if (!($user instanceof TwoFactorInterface)) {
+            return false;
+        }
+
+        //Decode our authentication code
+        $authCode = json_decode($authenticationCode,null, 512, JSON_THROW_ON_ERROR);
+
+        $todo = new \stdClass();
+        return $this->authenticator->checkRequest($user, $todo,  $authCode);
+    }
+
     public function prepareAuthentication(object $user): void
     {
         //We have nothing to prepare
         return;
     }
 
-    public function validateAuthenticationCode(object $user, string $authenticationCode): bool
-    {
-        // TODO: Implement validateAuthenticationCode() method.
-    }
-
     public function getFormRenderer(): TwoFactorFormRendererInterface
     {
-        // TODO: Implement getFormRenderer() method.
+        return $this->formRenderer;
     }
 }

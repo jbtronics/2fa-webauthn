@@ -1,0 +1,9 @@
+services:
+  jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn:
+    arguments:
+      $template: '@TFAWebauthn/Authentication/form.html.twig'
+
+  jbtronics\TFAWebauthn\Services\Helpers\WebauthnProvider:
+    arguments:
+      $rpId: 'localhost'
+      $rpName: 'Test App'

@@ -2,7 +2,9 @@
 
 namespace jbtronics\TFAWebauthn;
 
-class TFAWebauthnBundle
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+
+class TFAWebauthnBundle extends Bundle
 {
 
 }
