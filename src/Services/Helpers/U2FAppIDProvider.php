@@ -1,6 +1,6 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Services\Helpers;
+namespace Jbtronics\TFAWebauthn\Services\Helpers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

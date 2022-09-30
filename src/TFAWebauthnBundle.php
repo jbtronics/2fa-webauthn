@@ -1,6 +1,6 @@
 <?php
 
-namespace jbtronics\TFAWebauthn;
+namespace Jbtronics\TFAWebauthn;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

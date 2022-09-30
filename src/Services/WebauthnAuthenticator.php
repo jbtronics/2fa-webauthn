@@ -1,12 +1,12 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Services;
+namespace Jbtronics\TFAWebauthn\Services;
 
-use jbtronics\TFAWebauthn\Model\TwoFactorInterface;
-use jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
-use jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
-use jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
-use jbtronics\TFAWebauthn\Services\Helpers\WebauthnProvider;
+use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
+use Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
+use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
+use Jbtronics\TFAWebauthn\Services\Helpers\WebauthnProvider;
 use lbuchs\WebAuthn\WebAuthn;
 
 class WebauthnAuthenticator implements WebauthnAuthenticatorInterface

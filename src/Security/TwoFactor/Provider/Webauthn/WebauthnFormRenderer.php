@@ -1,9 +1,9 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
+namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
-use jbtronics\TFAWebauthn\Model\TwoFactorInterface;
-use jbtronics\TFAWebauthn\Services\WebauthnAuthenticator;
+use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Jbtronics\TFAWebauthn\Services\WebauthnAuthenticator;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +13,7 @@ use Twig\Environment;
 
 final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
 {
-    private TokenInterface $token;
+    private TokenStorageInterface $tokenStorage;
     private Environment $twig;
     private WebauthnAuthenticatorInterface $authenticator;
 
@@ -21,18 +21,22 @@ final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
 
     public function __construct(TokenStorageInterface $tokenStorage, Environment $twig, WebauthnAuthenticator $authenticator, string $template)
     {
-        $this->token = $tokenStorage->getToken();
+        $this->tokenStorage = $tokenStorage;
         $this->twig = $twig;
         $this->authenticator = $authenticator;
+
+        $this->template = $template;
     }
 
     public function renderForm(Request $request, array $templateVars): Response
     {
-        if ($this->token === null) {
+        $token = $this->tokenStorage->getToken();
+
+        if ($token === null) {
             throw new \RuntimeException('Token cannot be null! You have to be already logged in to use this form.');
         }
 
-        $user = $this->token->getUser();
+        $user = $token->getUser();
         if (!$user instanceof TwoFactorInterface) {
             throw new \RuntimeException('User has to be a TwoFactorInterface!');
         }

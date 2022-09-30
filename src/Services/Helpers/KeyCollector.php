@@ -1,9 +1,9 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Services\Helpers;
+namespace Jbtronics\TFAWebauthn\Services\Helpers;
 
-use jbtronics\TFAWebauthn\Helpers\WebsafeBase64;
-use jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Jbtronics\TFAWebauthn\Helpers\WebsafeBase64;
+use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 
 class KeyCollector
 {

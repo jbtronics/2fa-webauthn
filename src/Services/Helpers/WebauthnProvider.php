@@ -1,6 +1,6 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Services\Helpers;
+namespace Jbtronics\TFAWebauthn\Services\Helpers;
 
 use lbuchs\WebAuthn\WebAuthn;
 
@@ -9,7 +9,7 @@ use lbuchs\WebAuthn\WebAuthn;
  */
 final class WebauthnProvider
 {
-    private WebAuthn $webauthn;
+    private ?WebAuthn $webauthn =  null;
 
     private string $rpId;
     private string $rpName;

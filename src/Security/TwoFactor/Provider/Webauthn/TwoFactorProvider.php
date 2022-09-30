@@ -1,8 +1,8 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
+namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
-use jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\AuthenticationContextInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorProviderInterface;
@@ -27,7 +27,7 @@ final class TwoFactorProvider implements TwoFactorProviderInterface
         return $user instanceof TwoFactorInterface && $user->isWebAuthnAuthenticatorEnabled();
     }
 
-    public function validateAuthenticationCode(object $user, string $authenticationCode): bool
+    public function validateAuthenticationCode($user, string $authenticationCode): bool
     {
         if (!($user instanceof TwoFactorInterface)) {
             return false;
@@ -40,7 +40,7 @@ final class TwoFactorProvider implements TwoFactorProviderInterface
         return $this->authenticator->checkRequest($user, $todo,  $authCode);
     }
 
-    public function prepareAuthentication(object $user): void
+    public function prepareAuthentication($user): void
     {
         //We have nothing to prepare
         return;

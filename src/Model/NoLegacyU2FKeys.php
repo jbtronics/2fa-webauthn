@@ -1,6 +1,6 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Model;
+namespace Jbtronics\TFAWebauthn\Model;
 
 trait NoLegacyU2FKeys
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
+namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
-use jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 
 interface WebauthnAuthenticatorInterface
 {

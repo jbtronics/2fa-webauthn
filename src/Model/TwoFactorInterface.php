@@ -1,8 +1,8 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Model;
+namespace Jbtronics\TFAWebauthn\Model;
 
-use jbtronics\TFAWebauthn\Model\Legacy\LegacyU2FKeyInterface;
+use Jbtronics\TFAWebauthn\Model\Legacy\LegacyU2FKeyInterface;
 
 /**
  * A user has to implement this interface to allow 2FA with webauthn

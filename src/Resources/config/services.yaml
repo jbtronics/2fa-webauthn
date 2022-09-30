@@ -1,0 +1,39 @@
+services:
+  jbtronics_webauthn_tfa.two_factor_provider:
+    class: Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\TwoFactorProvider
+    # This tag is important to register the provider as TwoFactor provider
+    tags:
+      - { name: scheb_two_factor.provider, alias: webauthn_two_factor_provider }
+    arguments:
+       $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
+       $formRenderer: '@jbtronics_webauthn_tfa.form_renderer'
+
+  jbtronics_webauthn_tfa.key_collector:
+    class: Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector
+
+  jbtronics_webauthn_tfa.u2f_app_id_provider:
+    class: Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider
+    arguments:
+      $requestStack: '@request_stack'
+      $override: null
+
+  jbtronics_webauthn_tfa.form_renderer:
+    class: Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnFormRenderer
+    arguments:
+      $tokenStorage: '@security.token_storage'
+      $twig: '@twig'
+      $template: '@@TFAWebauthn/Authentication/form.html.twig'
+      $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
+
+  jbtronics_webauthn_tfa.webauthn_provider:
+    class: Jbtronics\TFAWebauthn\Services\Helpers\WebauthnProvider
+    arguments:
+      $rpId: 'localhost'
+      $rpName: 'Test App'
+
+  jbtronics_webauthn_tfa.webauthn_authenticator:
+    class: Jbtronics\TFAWebauthn\Services\WebauthnAuthenticator
+    arguments:
+        $keyCollector: '@jbtronics_webauthn_tfa.key_collector'
+        $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
+        $u2FAppIDProvider: '@jbtronics_webauthn_tfa.u2f_app_id_provider'

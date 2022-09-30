@@ -1,6 +1,6 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Helpers;
+namespace Jbtronics\TFAWebauthn\Helpers;
 
 class WebsafeBase64
 {

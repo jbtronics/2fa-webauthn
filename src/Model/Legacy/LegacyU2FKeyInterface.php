@@ -1,6 +1,6 @@
 <?php
 
-namespace jbtronics\TFAWebauthn\Model\Legacy;
+namespace Jbtronics\TFAWebauthn\Model\Legacy;
 
 /**
  * This interface is used to describe U2F key registrations which can be used for backwards compatibility.
