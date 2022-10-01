@@ -23,4 +23,22 @@ class KeyCollector
 
         return $keyIDs;
     }
+
+    /**
+     * This function search for a public key for a given key ID
+     * @param  TwoFactorInterface  $user
+     * @param  string  $keyID
+     * @return string|null
+     */
+    public function findPublicKeyForID(TwoFactorInterface $user, string $keyID): ?string
+    {
+        //Collect legacy U2F keys first (we need to decode base64 to binary for the correct format, as r/u2f-bundle uses websafe base64 to store keyhandles)
+        foreach ($user->getLegacyU2FKeys() as $key) {
+            if (WebsafeBase64::decodeToBinary($key->getKeyHandle()) === $keyID) {
+                return $key->getPublicKey();
+            }
+        }
+
+        return null;
+    }
 }

@@ -7,6 +7,7 @@ services:
     arguments:
        $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
        $formRenderer: '@jbtronics_webauthn_tfa.form_renderer'
+       $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
 
   jbtronics_webauthn_tfa.key_collector:
     class: Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector
@@ -23,6 +24,7 @@ services:
       $tokenStorage: '@security.token_storage'
       $twig: '@twig'
       $template: '@@TFAWebauthn/Authentication/form.html.twig'
+      $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
       $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
 
   jbtronics_webauthn_tfa.webauthn_provider:
@@ -37,3 +39,8 @@ services:
         $keyCollector: '@jbtronics_webauthn_tfa.key_collector'
         $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
         $u2FAppIDProvider: '@jbtronics_webauthn_tfa.u2f_app_id_provider'
+
+  jbtronics_webauthn_tfa.webauthn_request_storage:
+    class: Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage
+    arguments:
+      $requestStack: '@request_stack'

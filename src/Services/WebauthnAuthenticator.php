@@ -7,7 +7,9 @@ use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthentic
 use Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebauthnProvider;
+use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use lbuchs\WebAuthn\WebAuthn;
+use lbuchs\WebAuthn\WebAuthnException;
 
 class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 {
@@ -51,7 +53,28 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
     public function checkRequest(TwoFactorInterface $user, \stdClass $request, \stdClass $response): bool
     {
-        //TODO
-        return false;
+        //We have to use rawId here, as we want the not U2F formatted keyId, as we format it in the KeyCollector for the legacy keys
+        //U2F keys can be detected by the fact, that id and rawId differs
+        $keyId = base64_decode($response->rawId);
+        $publicKey = $this->keyCollector->findPublicKeyForID($user, $keyId);
+
+        if ($publicKey === null) {
+            //No public key found in the database for the returned handle
+            return false;
+        }
+
+        try {
+            return $this->webauthn->processGet(
+                //Data we get from the response
+                base64_decode($response->response->clientDataJSON),
+                base64_decode($response->response->authenticatorData),
+                base64_decode($response->response->signature),
+                //Data we take from the request
+                $publicKey,
+                $request->publicKey->challenge,
+            );
+        } catch(WebAuthnException $exception) {
+            return false;
+        }
     }
 }

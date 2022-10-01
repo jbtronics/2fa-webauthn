@@ -3,6 +3,7 @@
 namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Scheb\TwoFactorBundle\Security\TwoFactor\AuthenticationContextInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorProviderInterface;
@@ -11,11 +12,13 @@ final class TwoFactorProvider implements TwoFactorProviderInterface
 {
     private WebauthnFormRenderer $formRenderer;
     private WebauthnAuthenticatorInterface $authenticator;
+    private WebAuthnRequestStorage $requestStorage;
 
-    public function __construct(WebauthnFormRenderer $formRenderer, WebauthnAuthenticatorInterface $authenticator)
+    public function __construct(WebauthnFormRenderer $formRenderer, WebauthnAuthenticatorInterface $authenticator, WebAuthnRequestStorage $webAuthnRequestStorage)
     {
         $this->formRenderer = $formRenderer;
         $this->authenticator = $authenticator;
+        $this->requestStorage = $webAuthnRequestStorage;
     }
 
 
@@ -36,8 +39,12 @@ final class TwoFactorProvider implements TwoFactorProviderInterface
         //Decode our authentication code
         $authCode = json_decode($authenticationCode,null, 512, JSON_THROW_ON_ERROR);
 
-        $todo = new \stdClass();
-        return $this->authenticator->checkRequest($user, $todo,  $authCode);
+        $activeAuthRequest = $this->requestStorage->getActiveAuthRequest();
+        if($activeAuthRequest === null) {
+            return false;
+        }
+
+        return $this->authenticator->checkRequest($user, $activeAuthRequest,  $authCode);
     }
 
     public function prepareAuthentication($user): void
