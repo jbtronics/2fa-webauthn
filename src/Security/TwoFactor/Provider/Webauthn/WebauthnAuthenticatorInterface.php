@@ -3,6 +3,10 @@
 namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
+use Webauthn\AuthenticatorAssertionResponse;
+use Webauthn\PublicKeyCredential;
+use Webauthn\PublicKeyCredentialOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 interface WebauthnAuthenticatorInterface
 {
@@ -11,14 +15,14 @@ interface WebauthnAuthenticatorInterface
      * @param  TwoFactorInterface  $user
      * @return \stdClass
      */
-    public function getGenerateRequest(TwoFactorInterface $user): \stdClass;
+    public function getGenerateRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions;
 
     /**
      * Checks if the given webauthn response is valid
      * @param  TwoFactorInterface  $user
-     * @param  \stdClass  $request The request for which the response was generated, in the form it was returned by getGenerateRequest
-     * @param  \stdClass  $response The response from the browser, in the form it was returned by navigator.credentials.get
+     * @param  PublicKeyCredentialOptions  $request The request for which the response was generated, in the form it was returned by getGenerateRequest
+     * @param  AuthenticatorAssertionResponse  $response The response from the browser, in the form it was returned by navigator.credentials.get
      * @return bool
      */
-    public function checkRequest(TwoFactorInterface $user, \stdClass $request, \stdClass $response): bool;
+    public function checkRequest(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $response): bool;
 }

@@ -4,6 +4,8 @@ namespace Jbtronics\TFAWebauthn\Services\Helpers;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Webauthn\PublicKeyCredentialOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 class WebAuthnRequestStorage
 {
@@ -16,15 +18,21 @@ class WebAuthnRequestStorage
         $this->requestStack = $requestStack;
     }
 
-    public function setActiveAuthRequest(?\stdClass $authRequest): void
+    public function setActiveAuthRequest(?PublicKeyCredentialRequestOptions $authRequest): void
     {
         $session = $this->requestStack->getSession();
-        $session->set(self::AUTH_KEY, $authRequest);
+        $session->set(self::AUTH_KEY, json_encode($authRequest, JSON_THROW_ON_ERROR));
     }
 
-    public function getActiveAuthRequest(): ?\stdClass
+    public function getActiveAuthRequest(): ?PublicKeyCredentialRequestOptions
     {
         $session = $this->requestStack->getSession();
-        return $session->get(self::AUTH_KEY);
+
+        $stored = $session->get(self::AUTH_KEY);
+        if ($stored === null) {
+            return null;
+        }
+
+        return PublicKeyCredentialRequestOptions::createFromString($stored);
     }
 }

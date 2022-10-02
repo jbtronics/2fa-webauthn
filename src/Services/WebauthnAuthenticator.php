@@ -6,75 +6,79 @@ use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
-use Jbtronics\TFAWebauthn\Services\Helpers\WebauthnProvider;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
-use lbuchs\WebAuthn\WebAuthn;
-use lbuchs\WebAuthn\WebAuthnException;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Webauthn\AuthenticationExtensions\AuthenticationExtension;
+use Webauthn\AuthenticatorAssertionResponse;
+use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\PublicKeyCredentialDescriptor;
+use Webauthn\PublicKeyCredentialOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
 class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 {
 
-    private WebAuthn $webauthn;
     private U2FAppIDProvider $u2fAppIDProvider;
     private KeyCollector $keyCollector;
 
     protected string $requireUserVerification = "discouraged";
-    protected int $timeout = 20;
+    protected int $timeout = 20000;
+    protected WebauthnProvider $webauthnProvider;
+    protected RequestStack $requestStack;
 
 
-    public function __construct(WebauthnProvider $webauthnProvider, U2FAppIDProvider $u2FAppIDProvider, KeyCollector $keyCollector)
+    public function __construct(U2FAppIDProvider $u2FAppIDProvider, KeyCollector $keyCollector, WebauthnProvider $webauthnProvider, RequestStack $requestStack)
     {
-        $this->webauthn = $webauthnProvider->getInstance();
         $this->u2fAppIDProvider = $u2FAppIDProvider;
         $this->keyCollector = $keyCollector;
+        $this->webauthnProvider = $webauthnProvider;
+        $this->requestStack = $requestStack;
     }
 
-    public function getGenerateRequest(TwoFactorInterface $user): \stdClass
+    public function getGenerateRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions
     {
-        $credentialsID = $this->keyCollector->collectKeyIDs($user);
+        $allowedCredentials = $this->keyCollector->collectKeyIDsAsDescriptorArray($user);
 
-        $data = $this->webauthn->getGetArgs(
-            $credentialsID,
-            $this->timeout,
-            true,
-            true,
-            true,
-            true,
-            $this->requireUserVerification
+
+        $challenge = random_bytes(32);
+        $request = new PublicKeyCredentialRequestOptions($challenge);
+        $request->setRpId('localhost');
+        $request->setTimeout($this->timeout);
+        $request->setUserVerification(AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_DISCOURAGED);
+
+        $request->allowCredentials($allowedCredentials);
+
+        $request->addExtension(new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID()));
+
+        return $request;
+    }
+
+    public function checkRequest(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $jsonResponse): bool
+    {
+        $publicKeyCredentialLoader = $this->webauthnProvider->getPublicKeyCredentialLoader();
+        $validator = $this->webauthnProvider->getAuthenticatorAssertionResponseValidator();
+
+        $publicKeyCredential = $publicKeyCredentialLoader->load($jsonResponse);
+        $authenticatorAssertionResponse = $publicKeyCredential->getResponse();
+        if (!$authenticatorAssertionResponse instanceof AuthenticatorAssertionResponse) {
+            return false;
+        }
+
+        $symfonyRequest = $this->requestStack->getCurrentRequest();
+        $psr17Factory = new Psr17Factory();
+        $psrHttpFactory = new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
+        $psrRequest = $psrHttpFactory->createRequest($symfonyRequest);
+
+        $publicKeyCredentialSource = $validator->check(
+            $publicKeyCredential->getRawId(),
+            $authenticatorAssertionResponse,
+            $request,
+            $psrRequest,
+            $user->getWebAuthnUser()->getName()
         );
 
-        //Add appid extension for backward compatibility with U2F
-        $extensions = new \stdClass();
-        $extensions->appid = $this->u2fAppIDProvider->getAppID();
-        $data->publicKey->extensions = $extensions;
-
-        return $data;
-    }
-
-    public function checkRequest(TwoFactorInterface $user, \stdClass $request, \stdClass $response): bool
-    {
-        //We have to use rawId here, as we want the not U2F formatted keyId, as we format it in the KeyCollector for the legacy keys
-        //U2F keys can be detected by the fact, that id and rawId differs
-        $keyId = base64_decode($response->rawId);
-        $publicKey = $this->keyCollector->findPublicKeyForID($user, $keyId);
-
-        if ($publicKey === null) {
-            //No public key found in the database for the returned handle
-            return false;
-        }
-
-        try {
-            return $this->webauthn->processGet(
-                //Data we get from the response
-                base64_decode($response->response->clientDataJSON),
-                base64_decode($response->response->authenticatorData),
-                base64_decode($response->response->signature),
-                //Data we take from the request
-                $publicKey,
-                $request->publicKey->challenge,
-            );
-        } catch(WebAuthnException $exception) {
-            return false;
-        }
+        return true;
     }
 }

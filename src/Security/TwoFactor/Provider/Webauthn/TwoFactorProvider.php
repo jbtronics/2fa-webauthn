@@ -7,6 +7,8 @@ use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Scheb\TwoFactorBundle\Security\TwoFactor\AuthenticationContextInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorProviderInterface;
+use Webauthn\AttestationStatement\AttestationObjectLoader;
+use Webauthn\PublicKeyCredentialLoader;
 
 final class TwoFactorProvider implements TwoFactorProviderInterface
 {
@@ -36,15 +38,12 @@ final class TwoFactorProvider implements TwoFactorProviderInterface
             return false;
         }
 
-        //Decode our authentication code
-        $authCode = json_decode($authenticationCode,null, 512, JSON_THROW_ON_ERROR);
-
         $activeAuthRequest = $this->requestStorage->getActiveAuthRequest();
         if($activeAuthRequest === null) {
             return false;
         }
 
-        return $this->authenticator->checkRequest($user, $activeAuthRequest,  $authCode);
+        return $this->authenticator->checkRequest($user, $activeAuthRequest,  $authenticationCode);
     }
 
     public function prepareAuthentication($user): void
