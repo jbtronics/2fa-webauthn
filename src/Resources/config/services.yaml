@@ -9,9 +9,6 @@ services:
        $formRenderer: '@jbtronics_webauthn_tfa.form_renderer'
        $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
 
-  jbtronics_webauthn_tfa.key_collector:
-    class: Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector
-
   jbtronics_webauthn_tfa.u2f_app_id_provider:
     class: Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider
     arguments:
@@ -30,7 +27,7 @@ services:
   jbtronics_webauthn_tfa.webauthn_authenticator:
     class: Jbtronics\TFAWebauthn\Services\WebauthnAuthenticator
     arguments:
-        $keyCollector: '@jbtronics_webauthn_tfa.key_collector'
+        $publicKeyCredentialSourceRepository: '@jbtronics_webauthn_tfa.user_public_key_source_repo'
         $u2FAppIDProvider: '@jbtronics_webauthn_tfa.u2f_app_id_provider'
         $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
         $requestStack: '@request_stack'
