@@ -3,6 +3,7 @@
 namespace Jbtronics\TFAWebauthn\Model;
 
 use Jbtronics\TFAWebauthn\Model\Legacy\LegacyU2FKeyInterface;
+use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 /**
@@ -17,11 +18,17 @@ interface TwoFactorInterface
     public function isWebAuthnAuthenticatorEnabled(): bool;
 
     /**
-     * Returns a list of all legacy U2F keys.
+     * Returns a list of all legacy U2F keys, associated with this user
      * Return an empty array, if this user does not have any legacy U2F keys.
      * @return iterable<LegacyU2FKeyInterface>
      */
     public function getLegacyU2FKeys(): iterable;
+
+    /**
+     * Returns a list of all webauthn keys, associated with this user
+     * @return iterable<PublicKeyCredentialSource>
+     */
+    public function getWebauthnKeys(): iterable;
 
     /**
      * Returns the webauthn user entity that should be used for this user.

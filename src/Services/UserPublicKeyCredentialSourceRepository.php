@@ -66,6 +66,9 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
             );
         }
 
+        //Add the new webauthn keys
+        $result = array_merge($result, $user->getWebAuthnKeys());
+
         return $result;
     }
 
