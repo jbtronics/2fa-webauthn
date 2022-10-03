@@ -6,7 +6,6 @@ use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
-use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -26,17 +25,21 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
     private PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository;
 
     protected string $requireUserVerification = "discouraged";
-    protected int $timeout = 20000;
+    protected int $timeout;
+    protected ?string $rpID;
     protected WebauthnProvider $webauthnProvider;
     protected RequestStack $requestStack;
 
 
-    public function __construct(U2FAppIDProvider $u2FAppIDProvider, PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository, WebauthnProvider $webauthnProvider, RequestStack $requestStack)
+    public function __construct(U2FAppIDProvider $u2FAppIDProvider, PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
+        WebauthnProvider $webauthnProvider, RequestStack $requestStack, int $timeout, ?string $rpID)
     {
         $this->u2fAppIDProvider = $u2FAppIDProvider;
         $this->publicKeyCredentialSourceRepository = $publicKeyCredentialSourceRepository;
         $this->webauthnProvider = $webauthnProvider;
         $this->requestStack = $requestStack;
+        $this->timeout = $timeout;
+        $this->rpID = $rpID;
     }
 
     public function getGenerateRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions
@@ -54,9 +57,9 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
         $request = new PublicKeyCredentialRequestOptions($challenge);
         //Set options
-        $request->setRpId('localhost');
+        $request->setRpId($this->rpID);
         $request->setTimeout($this->timeout);
-        $request->setUserVerification(AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_DISCOURAGED);
+        $request->setUserVerification($this->requireUserVerification);
 
         $request->allowCredentials($allowedCredentials);
 

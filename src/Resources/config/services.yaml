@@ -13,14 +13,14 @@ services:
     class: Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider
     arguments:
       $requestStack: '@request_stack'
-      $override: null
+      $override: '%jbtronics_webauthn_tfa.U2FAppID%'
 
   jbtronics_webauthn_tfa.form_renderer:
     class: Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnFormRenderer
     arguments:
       $tokenStorage: '@security.token_storage'
       $twig: '@twig'
-      $template: '@@TFAWebauthn/Authentication/form.html.twig'
+      $template: '%jbtronics_webauthn_tfa.template%'
       $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
       $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
 
@@ -31,6 +31,8 @@ services:
         $u2FAppIDProvider: '@jbtronics_webauthn_tfa.u2f_app_id_provider'
         $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
         $requestStack: '@request_stack'
+        $rpID: '%jbtronics_webauthn_tfa.rpID%'
+        $timeout: '%jbtronics_webauthn_tfa.timeout%'
 
   jbtronics_webauthn_tfa.webauthn_request_storage:
     class: Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage
