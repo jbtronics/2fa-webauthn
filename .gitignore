@@ -54,3 +54,6 @@
 /.web-server-pid
 
 .idea/
+
+# Do not save composer.lock
+composer.lock
