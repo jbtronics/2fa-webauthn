@@ -61,7 +61,7 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
                 new EmptyTrustPath(), //dummy
                 Uuid::fromInteger(0), //dummy,
                 base64_decode($legacyU2FKey->getPublicKey()),
-                $user->getWebAuthnUser()->getName(),
+                $user->getWebAuthnUser()->getId(),
                 0 //must be 0 to disable counter checking
             );
         }

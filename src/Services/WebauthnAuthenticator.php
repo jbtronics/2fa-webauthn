@@ -96,7 +96,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
                 $authenticatorAssertionResponse,
                 $request,
                 $psrRequest,
-                $user->getWebAuthnUser()->getName()
+                $user->getWebAuthnUser()->getId()
             );
 
             return true;
