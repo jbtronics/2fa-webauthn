@@ -10,7 +10,7 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 ## Installation
 1. Install the bundle `composer require jbtronics/2fa-webauthn`
 2. Enable the bundle in your `config/bundles.php` (normally done by Symfony flex automatically)
-3. If you want to use the easy doctrine integration, add the web-authn symfony bundle: `composer require web-auth/webauthn-symfony-bundle`
+3. If you want to use the easy doctrine integration, add the web-authn symfony bundle: `composer require web-auth/webauthn-symfony-bundle`. You do not need to run the community recipe, as we just use the doctrine type definitons from the bundle.
 
 ## Setup and Usage
 After following the Installation steps, do the follwing steps to setup the library:
