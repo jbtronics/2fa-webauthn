@@ -17,7 +17,11 @@
 {# Display current two-factor provider #}
 <p class="label"><label for="_auth_code">{{ "auth_code"|trans({}, 'SchebTwoFactorBundle') }} {{ twoFactorProvider }}:</label></p>
 
-<form class="form" action="{{ checkPathUrl ? checkPathUrl: path(checkPathRoute) }}" method="post">
+{% if not app.request.secure %}
+    <b>Warning: Webauthn authentication is only supported via a secure context (HTTPS connection)!</b>
+{% endif %}
+
+<form class="form" action="{{ checkPathUrl ? checkPathUrl: path(checkPathRoute) }}" method="post" data-webauthn-tfa-action="authenticate" data-webauthn-tfa-data='{{ webauthn_request_data|raw }}'>
     <p class="widget">
         <input
                 id="_auth_code"
@@ -30,9 +34,11 @@
     {% if displayTrustedOption %}
         <p class="widget"><label for="_trusted"><input id="_trusted" type="checkbox" name="{{ trustedParameterName }}" /> {{ "trusted"|trans({}, 'SchebTwoFactorBundle') }}</label></p>
     {% endif %}
+
     {% if isCsrfProtectionEnabled %}
         <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
     {% endif %}
+
     <p class="submit"><input type="submit" value="{{ "login"|trans({}, 'SchebTwoFactorBundle') }}" /></p>
 </form>
 
