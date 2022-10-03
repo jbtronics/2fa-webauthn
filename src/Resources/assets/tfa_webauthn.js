@@ -127,9 +127,6 @@ class WebauthnTFA {
         register_dom_ready(() => {
             this.registerForms();
         });
-
-        //Support SPA with Turbo
-        document.addEventListener('turbo:load', fn);
     }
 
     registerForms()
