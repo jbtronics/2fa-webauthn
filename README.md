@@ -7,6 +7,10 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 * Supports multiple authenticators per user
 * Backward compatibility for existing registered U2F keys (from [r/u2f-two-factor-bundle](https://github.com/darookee/u2f-two-factor-bundle))
 
+## Requirements
+* Symfony 5
+* PHP 7.4 or later
+
 ## Installation
 1. Install the bundle `composer require jbtronics/2fa-webauthn`
 2. Enable the bundle in your `config/bundles.php` (normally done by Symfony flex automatically)
@@ -94,8 +98,8 @@ class WebAuthnKey extends BasePublicKeyCredentialSource
     /**
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", length=100)
-     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
     
@@ -105,12 +109,8 @@ class WebAuthnKey extends BasePublicKeyCredentialSource
     protected ?User $user = null;
     
     //You can declare additional fields too, if you want to store additional information about the key (like a name)
+    private $name;
 
-    public function __construct(string $publicKeyCredentialId, string $type, array $transports, string $attestationType, TrustPath $trustPath, UuidInterface $aaguid, string $credentialPublicKey, string $userHandle, int $counter)
-    {
-        $this->id = Uuid::uuid4()->toString();
-        parent::__construct($publicKeyCredentialId, $type, $transports, $attestationType, $trustPath, $aaguid, $credentialPublicKey, $userHandle, $counter);
-    }
 
     public function getId(): string
     {
@@ -172,7 +172,7 @@ In principle the login with exsting keys should work now, but you will most like
     /**
      * @Route("/webauthn/register", name="webauthn_register")
      */
-    public function register(Request $request, TFAWebauthnRegistrationHelper $registrationHelper)
+    public function register(Request $request, TFAWebauthnRegistrationHelper $registrationHelper, EntityManagerInterface $em)
     {
 
         //If form was submitted, check the auth response
@@ -192,7 +192,13 @@ In principle the login with exsting keys should work now, but you will most like
             
             //If we got here, the registration was successful. Now we can store the new key in the database
             
-            //TODO: Convert our returned key into an database entity and save it...
+            //Convert our returned key into an database entity and persist it...
+            $keyEntity = WebauthnKey::fromRegistration($new_key);
+            $keyEntity->setName($keyName);
+            $keyEntity->setUser($this->getUser());
+
+            $em->persist($keyEntity);
+            $em->flush();
             
             
             $this->addFlash('success', 'Key registered successfully');
@@ -229,7 +235,7 @@ If the form is submitted, the frontend code will catch that and start a registra
 
 ## Migrate from r/u2f-two-factor-bundle
 
-1. Replace the `R\U2FTwoFactorBundle\Model\U2F\TwoFactorKeyInterface` interface of your U2FKey entity with `Jbtronics\TFAWebauthn\Model\LegacyU2FKeyInterface` and remove the constructor (as we do not need it anymore).
+1. Replace the `R\U2FTwoFactorBundle\Model\U2F\TwoFactorKeyInterface` interface of your U2FKey entity with `Jbtronics\TFAWebauthn\Model\LegacyU2FKeyInterface` and remove the fromRegistrationData() function (as we do not need it anymore).
 2. Replace the `R\U2FTwoFactorBundle\Model\U2F\TwoFactorInterface` interface of your user with `Jbtronics\TFAWebauthn\Model\TwoFactorInterface`, configure it (see above) and replace/rename your `getU2FKeys()` function to `getLegacyU2FKeys()`.
 3. (Optional:) If your appID is not the same as your domain, configure it with the `U2FAppID` option. But this should normally not be needed
 4. Remove the old routes, templates and settings of the `r/u2f-two-factor-bundle` and remove it from your application
