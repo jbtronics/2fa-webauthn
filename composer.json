@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "license": "MIT",
     "description": "Webauthn Two-Factor-Authentictication Plugin for scheb/2fa",
-    "keywords": ["2fa", "webauthn", "two-factor-authentication", "scheb/2fa", "symfony", "symfony-bundle"],
+    "keywords": ["2fa", "webauthn", "two-factor-authentication", "scheb-2fa", "symfony", "symfony-bundle"],
     "autoload": {
         "psr-4": {
             "Jbtronics\\TFAWebauthn\\": "src/"
