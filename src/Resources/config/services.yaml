@@ -24,15 +24,30 @@ services:
       $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
       $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
 
+  jbtronics_webauthn_tfa.psr_request_helper:
+    class: Jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper
+    arguments:
+      $requestStack: '@request_stack'
+
   jbtronics_webauthn_tfa.webauthn_authenticator:
     class: Jbtronics\TFAWebauthn\Services\WebauthnAuthenticator
     arguments:
         $publicKeyCredentialSourceRepository: '@jbtronics_webauthn_tfa.user_public_key_source_repo'
         $u2FAppIDProvider: '@jbtronics_webauthn_tfa.u2f_app_id_provider'
         $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
-        $requestStack: '@request_stack'
+        $PSRRequestHelper: '@jbtronics_webauthn_tfa.psr_request_helper'
         $rpID: '%jbtronics_webauthn_tfa.rpID%'
         $timeout: '%jbtronics_webauthn_tfa.timeout%'
+
+  jbtronics_webauthn_tfa.registration_helper:
+    class: Jbtronics\TFAWebauthn\Services\TFAWebauthnRegistrationHelper
+    arguments:
+      $PSRRequestHelper: '@jbtronics_webauthn_tfa.psr_request_helper'
+      $timeout: '%jbtronics_webauthn_tfa.timeout%'
+      $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
+      $security: '@security.helper'
+      $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
+      $keyCredentialSourceRepository: '@jbtronics_webauthn_tfa.user_public_key_source_repo'
 
   jbtronics_webauthn_tfa.webauthn_request_storage:
     class: Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage
@@ -48,3 +63,10 @@ services:
     class: Jbtronics\TFAWebauthn\Services\WebauthnProvider
     arguments:
       $publicKeyCredentialSourceRepository: '@jbtronics_webauthn_tfa.user_public_key_source_repo'
+      $rpID: '%jbtronics_webauthn_tfa.rpID%'
+      $rpName: '%jbtronics_webauthn_tfa.rpName%'
+      $rpIcon: '%jbtronics_webauthn_tfa.rpIcon%'
+
+
+  # Alias definition for autowiring
+  Jbtronics\TFAWebauthn\Services\TFAWebauthnRegistrationHelper: '@jbtronics_webauthn_tfa.registration_helper'

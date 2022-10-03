@@ -4,10 +4,15 @@ namespace Jbtronics\TFAWebauthn\Services;
 
 use Cose\Algorithm\Manager;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
+use Webauthn\AttestationStatement\AttestationStatement;
+use Webauthn\AttestationStatement\AttestationStatementSupport;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
+use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponseValidator;
+use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 use Cose\Algorithm\Signature\ECDSA\ES256;
@@ -23,6 +28,9 @@ use Cose\Algorithm\Signature\RSA\RS256;
 use Cose\Algorithm\Signature\RSA\RS384;
 use Cose\Algorithm\Signature\RSA\RS512;
 
+/**
+ * This service provides some common services of the web-authn library which are configured by the global configuration
+ */
 class WebauthnProvider
 {
     private PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository;
@@ -30,11 +38,36 @@ class WebauthnProvider
     private PublicKeyCredentialLoader $publicKeyCredentialLoader;
 
     private AuthenticatorAssertionResponseValidator $assertionResponseValidator;
+    private AuthenticatorAttestationResponseValidator $attestationResponseValidator;
+    private PublicKeyCredentialRpEntity $rpEntity;
 
-    public function __construct(PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository)
+    private ?string $rpID;
+    private string $rpName;
+    private ?string $rpIcon;
+
+    public function __construct(PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository, ?string $rpID, string $rpName, ?string $rpIcon)
     {
         $this->publicKeyCredentialSourceRepository = $publicKeyCredentialSourceRepository;
 
+        //Create the RP entity
+        $this->rpID = $rpID;
+        $this->rpName = $rpName;
+        $this->rpIcon = $rpIcon;
+
+        $this->rpEntity = new PublicKeyCredentialRpEntity(
+            $this->rpName,
+            $this->rpID,
+            $this->rpIcon
+        );
+
+        //Create the public key credential loader
+        $attestationSupportStatementManager = new AttestationStatementSupportManager();
+        $this->addAttestationTypes($attestationSupportStatementManager);
+        $attestationObjectLoader = new AttestationObjectLoader($attestationSupportStatementManager);
+
+        $this->publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader);
+
+        //Create the assertion response validator
         $tokenBindingHandler = new TokenBindingNotSupportedHandler();
         $extensionOutputCheckerHandler = new ExtensionOutputCheckerHandler();
         $coseAlgorithmManager = new Manager();
@@ -47,10 +80,14 @@ class WebauthnProvider
             $coseAlgorithmManager,
         );
 
-        $attestationSupportStatementManager = new AttestationStatementSupportManager();
-        $attestationObjectLoader = new AttestationObjectLoader($attestationSupportStatementManager);
+        //Create the attestation response validator
 
-        $this->publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader);
+        $this->attestationResponseValidator = new AuthenticatorAttestationResponseValidator(
+            $attestationSupportStatementManager,
+            $this->publicKeyCredentialSourceRepository,
+            $tokenBindingHandler,
+            $extensionOutputCheckerHandler
+        );
     }
 
     private function addAlgorithms(Manager $coseAlgorithmManager) {
@@ -71,6 +108,16 @@ class WebauthnProvider
         $coseAlgorithmManager->add(new ED512());
     }
 
+    private function addAttestationTypes(AttestationStatementSupportManager $attestationStatementSupportManager) {
+        //For now we just support the none attestations statement type as we do not request it
+        $attestationStatementSupportManager->add(new NoneAttestationStatementSupport());
+    }
+
+    public function getPublicKeyCredentialRpEntity(): PublicKeyCredentialRpEntity
+    {
+        return $this->rpEntity;
+    }
+
     public function getAuthenticatorAssertionResponseValidator(): AuthenticatorAssertionResponseValidator
     {
         return $this->assertionResponseValidator;
@@ -79,5 +126,10 @@ class WebauthnProvider
     public function getPublicKeyCredentialLoader(): PublicKeyCredentialLoader
     {
         return $this->publicKeyCredentialLoader;
+    }
+
+    public function getAuthenticatorAttestationResponseValidator(): AuthenticatorAttestationResponseValidator
+    {
+        return $this->attestationResponseValidator;
     }
 }

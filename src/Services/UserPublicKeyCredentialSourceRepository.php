@@ -54,7 +54,7 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
                 WebsafeBase64::decodeToBinary($legacyU2FKey->getKeyHandle()),
                 'public-key',
                 [],
-                'self', //dummy
+                'none', //dummy
                 new EmptyTrustPath(), //dummy
                 Uuid::fromInteger(0), //dummy,
                 base64_decode($legacyU2FKey->getPublicKey()),
@@ -66,6 +66,10 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
         return $result;
     }
 
+    /**
+     * @param  PublicKeyCredentialUserEntity  $publicKeyCredentialUserEntity
+     * @return PublicKeyCredentialSource[]
+     */
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
         return $this->findAllForCurrentUser();

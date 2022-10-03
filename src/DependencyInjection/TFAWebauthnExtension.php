@@ -20,10 +20,13 @@ class TFAWebauthnExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('jbtronics_webauthn_tfa.rpID', $config['rpID']);
         $container->setParameter('jbtronics_webauthn_tfa.timeout', $config['timeout']);
         $container->setParameter('jbtronics_webauthn_tfa.template', $config['template']);
         $container->setParameter('jbtronics_webauthn_tfa.U2FAppID', $config['U2FAppID']);
+
+        $container->setParameter('jbtronics_webauthn_tfa.rpID', $config['rpID']);
+        $container->setParameter('jbtronics_webauthn_tfa.rpName', $config['rpName']);
+        $container->setParameter('jbtronics_webauthn_tfa.rpIcon', $config['rpIcon']);
     }
 
 }

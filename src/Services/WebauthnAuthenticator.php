@@ -5,6 +5,7 @@ namespace Jbtronics\TFAWebauthn\Services;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
+use jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
@@ -28,21 +29,21 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
     protected int $timeout;
     protected ?string $rpID;
     protected WebauthnProvider $webauthnProvider;
-    protected RequestStack $requestStack;
+    protected PSRRequestHelper $PSRRequestHelper;
 
 
     public function __construct(U2FAppIDProvider $u2FAppIDProvider, PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
-        WebauthnProvider $webauthnProvider, RequestStack $requestStack, int $timeout, ?string $rpID)
+        WebauthnProvider $webauthnProvider, PSRRequestHelper $PSRRequestHelper, int $timeout, ?string $rpID)
     {
         $this->u2fAppIDProvider = $u2FAppIDProvider;
         $this->publicKeyCredentialSourceRepository = $publicKeyCredentialSourceRepository;
         $this->webauthnProvider = $webauthnProvider;
-        $this->requestStack = $requestStack;
+        $this->PSRRequestHelper = $PSRRequestHelper;
         $this->timeout = $timeout;
         $this->rpID = $rpID;
     }
 
-    public function getGenerateRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions
+    public function getGenerateRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
     {
         //Retrieve the registered keys for the user
         $allowedCredentials = array_map(
@@ -82,10 +83,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         }
 
         //We need a PSR conform version of our current request, so the webauthn library can get the currently used hostname (needed in case no rpId was explicitly set)
-        $symfonyRequest = $this->requestStack->getCurrentRequest();
-        $psr17Factory = new Psr17Factory();
-        $psrHttpFactory = new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
-        $psrRequest = $psrHttpFactory->createRequest($symfonyRequest);
+        $psrRequest = $this->PSRRequestHelper->getCurrentRequestAsPSR7();
 
         //Do the check
         try {

@@ -16,8 +16,10 @@ class Configuration implements ConfigurationInterface
         $rootNode
             ->children()
             ->scalarNode('enabled')->defaultValue(false)->end()
-            ->integerNode('timeout')->defaultValue(30000)->end()
+            ->integerNode('timeout')->defaultValue(60000)->end()
             ->scalarNode('rpID')->defaultNull()->end()
+            ->scalarNode('rpName')->defaultValue('Webauthn Application')->end()
+            ->scalarNode('rpIcon')->defaultNull()->end()
             ->scalarNode('template')->defaultValue('@TFAWebauthn/Authentication/form.html.twig')->end()
             ->scalarNode('U2FAppID')->defaultNull()->end()
 
