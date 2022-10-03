@@ -43,7 +43,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         $this->rpID = $rpID;
     }
 
-    public function getGenerateRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
+    public function generateAuthenticationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
     {
         //Retrieve the registered keys for the user
         $allowedCredentials = array_map(
@@ -70,7 +70,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         return $request;
     }
 
-    public function checkRequest(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $jsonResponse): bool
+    public function checkAuthenticationResponse(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $jsonResponse): bool
     {
         $publicKeyCredentialLoader = $this->webauthnProvider->getPublicKeyCredentialLoader();
         $validator = $this->webauthnProvider->getAuthenticatorAssertionResponseValidator();
@@ -84,6 +84,10 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
         //We need a PSR conform version of our current request, so the webauthn library can get the currently used hostname (needed in case no rpId was explicitly set)
         $psrRequest = $this->PSRRequestHelper->getCurrentRequestAsPSR7();
+
+        if ($psrRequest === null) {
+            throw new \RuntimeException('Could not get current request as PSR7 request!');
+        }
 
         //Do the check
         try {

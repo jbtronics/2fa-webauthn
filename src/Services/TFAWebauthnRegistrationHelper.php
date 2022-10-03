@@ -35,7 +35,12 @@ class TFAWebauthnRegistrationHelper
         $this->webAuthnRequestStorage = $webAuthnRequestStorage;
     }
 
-    public function getRegistrationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialCreationOptions
+    /**
+     * Generate a new registration request for the given user and save it in the session as active registration.
+     * @param  TwoFactorInterface|null  $user The user for which the registration request should be generated. If null the current user is used.
+     * @return PublicKeyCredentialCreationOptions
+     */
+    public function generateRegistrationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialCreationOptions
     {
         //If no user is given use the current user
         if ($user === null) {
@@ -49,6 +54,7 @@ class TFAWebauthnRegistrationHelper
         $challenge = random_bytes(32);
 
 
+        //The algorithms we allow
         $publicKeyCredentialParametersList = [
             new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256),
             new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES512),
@@ -81,12 +87,23 @@ class TFAWebauthnRegistrationHelper
         return $data;
     }
 
-    public function getRegistrationRequestAsJSON(?TwoFactorInterface $user = null): string
+    /**
+     * Generate a new registration request for the given user and returns it as JSON, so that it can be passed to the browser.
+     * @param  TwoFactorInterface|null  $user
+     * @return string The registration request as JSON
+     */
+    public function generateRegistrationRequestAsJSON(?TwoFactorInterface $user = null): string
     {
-        return json_encode($this->getRegistrationRequest(), JSON_THROW_ON_ERROR);
+        return json_encode($this->generateRegistrationRequest($user), JSON_THROW_ON_ERROR);
     }
 
-    public function checkRegistration(string $jsonResponse): PublicKeyCredentialSource
+    /**
+     * Validate the given registration response and returns the new key.
+     * If the response is invalid an exception is thrown.
+     * @param  string  $jsonResponse The json encoded response from the browser
+     * @return PublicKeyCredentialSource The credential returned from the browser
+     */
+    public function checkRegistrationResponse(string $jsonResponse): PublicKeyCredentialSource
     {
         $publicKeyCredential = $this->webauthnProvider->getPublicKeyCredentialLoader()->load($jsonResponse);
         $authenticatorAttestationResponse = $publicKeyCredential->getResponse();

@@ -17,7 +17,7 @@ class PSRRequestHelper
     }
 
     /**
-     * Returns the current
+     * Returns the current server request as PSR7 conform request
      * @return ServerRequest|null
      */
     public function getCurrentRequestAsPSR7(): ?ServerRequest

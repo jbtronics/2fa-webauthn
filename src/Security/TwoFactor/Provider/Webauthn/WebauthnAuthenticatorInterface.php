@@ -13,16 +13,16 @@ interface WebauthnAuthenticatorInterface
     /**
      * Generates a webauthn signing request as an object which can directly be encoded to JSON and passed to navigator.credentials.get
      * @param  TwoFactorInterface  $user
-     * @return \stdClass
+     * @return PublicKeyCredentialRequestOptions
      */
-    public function getGenerateRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions;
+    public function generateAuthenticationRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions;
 
     /**
      * Checks if the given webauthn response is valid
      * @param  TwoFactorInterface  $user
-     * @param  PublicKeyCredentialOptions  $request The request for which the response was generated, in the form it was returned by getGenerateRequest
-     * @param  AuthenticatorAssertionResponse  $response The response from the browser, in the form it was returned by navigator.credentials.get
+     * @param  PublicKeyCredentialRequestOptions  $request  The request for which the response was generated, in the form it was returned by getGenerateRequest
+     * @param  string  $response  The JSON encoded response from the browser, in the form it was returned by navigator.credentials.get
      * @return bool
      */
-    public function checkRequest(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $response): bool;
+    public function checkAuthenticationResponse(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $response): bool;
 }

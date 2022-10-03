@@ -12,6 +12,9 @@ use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\EmptyTrustPath;
 
+/**
+ * This class provides the public key credential sources, normalize legacy U2F keys and merges U2F and Webauthn keys.
+ */
 class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
     private $security;

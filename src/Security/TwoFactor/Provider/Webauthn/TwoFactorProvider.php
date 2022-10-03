@@ -43,7 +43,7 @@ final class TwoFactorProvider implements TwoFactorProviderInterface
             return false;
         }
 
-        return $this->authenticator->checkRequest($user, $activeAuthRequest,  $authenticationCode);
+        return $this->authenticator->checkAuthenticationResponse($user, $activeAuthRequest,  $authenticationCode);
     }
 
     public function prepareAuthentication($user): void

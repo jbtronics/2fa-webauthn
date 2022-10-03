@@ -45,7 +45,7 @@ final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
             throw new \RuntimeException('User has to be a TwoFactorInterface!');
         }
 
-        $requestData = $this->authenticator->getGenerateRequest($user);
+        $requestData = $this->authenticator->generateAuthenticationRequest($user);
         $this->requestStorage->setActiveAuthRequest($requestData);
 
         $templateVars['webauthn_request_data'] = json_encode($requestData, JSON_THROW_ON_ERROR);
