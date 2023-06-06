@@ -3,9 +3,6 @@
 namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
-use Webauthn\AuthenticatorAssertionResponse;
-use Webauthn\PublicKeyCredential;
-use Webauthn\PublicKeyCredentialOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 
 interface WebauthnAuthenticatorInterface

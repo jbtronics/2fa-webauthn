@@ -6,7 +6,7 @@ use Cose\Algorithms;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
@@ -84,8 +84,6 @@ class TFAWebauthnRegistrationHelper
             $user->getWebAuthnUser(),
             $challenge,
             $publicKeyCredentialParametersList,
-            $this->timeout,
-            $excludedCredentials
         );
 
         $data->setTimeout($this->timeout);

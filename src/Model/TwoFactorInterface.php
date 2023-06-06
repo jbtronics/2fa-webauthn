@@ -2,7 +2,6 @@
 
 namespace Jbtronics\TFAWebauthn\Model;
 
-use Jbtronics\TFAWebauthn\Model\LegacyU2FKeyInterface;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 

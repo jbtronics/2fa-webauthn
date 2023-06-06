@@ -4,7 +4,7 @@ namespace Jbtronics\TFAWebauthn\Services;
 
 use Jbtronics\TFAWebauthn\Helpers\WebsafeBase64;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
@@ -16,7 +16,7 @@ use Webauthn\TrustPath\EmptyTrustPath;
  */
 class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
-    private $security;
+    private Security $security;
 
     public function __construct(Security $security)
     {
@@ -66,9 +66,7 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
         }
 
         //Add the new webauthn keys
-        $result = array_merge($result, iterator_to_array($user->getWebAuthnKeys()));
-
-        return $result;
+        return array_merge($result, iterator_to_array($user->getWebAuthnKeys()));
     }
 
     /**

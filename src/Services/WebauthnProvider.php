@@ -4,8 +4,6 @@ namespace Jbtronics\TFAWebauthn\Services;
 
 use Cose\Algorithm\Manager;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
-use Webauthn\AttestationStatement\AttestationStatement;
-use Webauthn\AttestationStatement\AttestationStatementSupport;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;

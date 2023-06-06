@@ -4,7 +4,6 @@ namespace Jbtronics\TFAWebauthn\Services;
 
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
-use Jbtronics\TFAWebauthn\Services\Helpers\KeyCollector;
 use jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
