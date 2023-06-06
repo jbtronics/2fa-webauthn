@@ -3,6 +3,18 @@
 namespace Jbtronics\TFAWebauthn\Services;
 
 use Cose\Algorithm\Manager;
+use Cose\Algorithm\Signature\ECDSA\ES256;
+use Cose\Algorithm\Signature\ECDSA\ES256K;
+use Cose\Algorithm\Signature\ECDSA\ES384;
+use Cose\Algorithm\Signature\ECDSA\ES512;
+use Cose\Algorithm\Signature\EdDSA\Ed256;
+use Cose\Algorithm\Signature\EdDSA\Ed512;
+use Cose\Algorithm\Signature\RSA\PS256;
+use Cose\Algorithm\Signature\RSA\PS384;
+use Cose\Algorithm\Signature\RSA\PS512;
+use Cose\Algorithm\Signature\RSA\RS256;
+use Cose\Algorithm\Signature\RSA\RS384;
+use Cose\Algorithm\Signature\RSA\RS512;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
@@ -12,18 +24,6 @@ use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSourceRepository;
-use Cose\Algorithm\Signature\ECDSA\ES256;
-use Cose\Algorithm\Signature\ECDSA\ES256K;
-use Cose\Algorithm\Signature\ECDSA\ES384;
-use Cose\Algorithm\Signature\ECDSA\ES512;
-use Cose\Algorithm\Signature\EdDSA\ED256;
-use Cose\Algorithm\Signature\EdDSA\ED512;
-use Cose\Algorithm\Signature\RSA\PS256;
-use Cose\Algorithm\Signature\RSA\PS384;
-use Cose\Algorithm\Signature\RSA\PS512;
-use Cose\Algorithm\Signature\RSA\RS256;
-use Cose\Algorithm\Signature\RSA\RS384;
-use Cose\Algorithm\Signature\RSA\RS512;
 use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 
 /**
