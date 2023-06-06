@@ -20,12 +20,13 @@
         "ext-json": "*",
         "symfony/framework-bundle": "^6.0",
         "scheb/2fa-bundle": "^6.0.0",
-        "web-auth/webauthn-lib": "^3.3|^4.0",
-        "web-auth/webauthn-symfony-bundle": "^4.2.0",
+        "web-auth/webauthn-lib": "^4.0",
         "symfony/psr-http-message-bridge": "^2.1",
-        "nyholm/psr7": "^1.5"
+        "nyholm/psr7": "^1.5",
+        "symfony/uid": "^6.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest",
         "phpunit/phpunit": "^9.5"
     }
 }

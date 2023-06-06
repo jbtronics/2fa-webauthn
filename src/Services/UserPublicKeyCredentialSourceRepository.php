@@ -4,9 +4,8 @@ namespace Jbtronics\TFAWebauthn\Services;
 
 use Jbtronics\TFAWebauthn\Helpers\WebsafeBase64;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Uid\Uuid;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
@@ -59,7 +58,7 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
                 [],
                 'none', //dummy
                 new EmptyTrustPath(), //dummy
-                Uuid::fromInteger(0), //dummy,
+                Uuid::fromBinary("\x00"), //dummy,
                 base64_decode($legacyU2FKey->getPublicKey()),
                 $user->getWebAuthnUser()->getId(),
                 0 //must be 0 to disable counter checking
