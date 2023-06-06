@@ -40,6 +40,10 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
     public function generateAuthenticationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
     {
+        if ($user === null) {
+            throw new \LogicException('You have to pass a user to this method!');
+        }
+
         //Retrieve the registered keys for the user
         $allowedCredentials = array_map(
             static function (PublicKeyCredentialSource $credential): PublicKeyCredentialDescriptor {
@@ -57,7 +61,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         $request->setTimeout($this->timeout);
         $request->setUserVerification($this->requireUserVerification);
 
-        $request->allowCredentials($allowedCredentials);
+        $request->allowCredentials(...$allowedCredentials);
 
         //Add the U2F appID extension for backward compatibility
         $request->addExtension(new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID()));

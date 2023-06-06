@@ -56,12 +56,19 @@ class TFAWebauthnRegistrationHelper
 
         //The algorithms we allow
         $publicKeyCredentialParametersList = [
-            new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES256),
-            new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ES512),
-            new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_RS256),
-            new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_RS512),
-            new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_ED256),
-            new PublicKeyCredentialParameters('public-key', Algorithms::COSE_ALGORITHM_EdDSA),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ES256),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ES256K),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ES384),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ES512),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_RS256),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_RS384),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_RS512),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_PS256),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_PS384),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_PS512),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ED256),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ED512),
+            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_EDDSA),
         ];
 
         //Exclude all existing credentials
@@ -80,6 +87,9 @@ class TFAWebauthnRegistrationHelper
             $this->timeout,
             $excludedCredentials
         );
+
+        $data->setTimeout($this->timeout);
+        $data->excludeCredentials(...$excludedCredentials);
 
         //Save creation options in the session, so it can be used for validation later
         $this->webAuthnRequestStorage->setActiveRegistrationRequest($data);

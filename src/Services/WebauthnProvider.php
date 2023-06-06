@@ -14,7 +14,6 @@ use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSourceRepository;
-use Webauthn\TokenBinding\TokenBindingNotSupportedHandler;
 use Cose\Algorithm\Signature\ECDSA\ES256;
 use Cose\Algorithm\Signature\ECDSA\ES256K;
 use Cose\Algorithm\Signature\ECDSA\ES384;
@@ -27,6 +26,7 @@ use Cose\Algorithm\Signature\RSA\PS512;
 use Cose\Algorithm\Signature\RSA\RS256;
 use Cose\Algorithm\Signature\RSA\RS384;
 use Cose\Algorithm\Signature\RSA\RS512;
+use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 
 /**
  * This service provides some common services of the web-authn library which are configured by the global configuration
@@ -68,10 +68,9 @@ class WebauthnProvider
         $this->publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader);
 
         //Create the assertion response validator
-        $tokenBindingHandler = new TokenBindingNotSupportedHandler();
+        $tokenBindingHandler = new IgnoreTokenBindingHandler();
         $extensionOutputCheckerHandler = new ExtensionOutputCheckerHandler();
-        $coseAlgorithmManager = new Manager();
-        $this->addAlgorithms($coseAlgorithmManager);
+        $coseAlgorithmManager = $this->createAlgorithmManager();
 
         $this->assertionResponseValidator = new AuthenticatorAssertionResponseValidator(
             $this->publicKeyCredentialSourceRepository,
@@ -90,25 +89,31 @@ class WebauthnProvider
         );
     }
 
-    private function addAlgorithms(Manager $coseAlgorithmManager) {
-        $coseAlgorithmManager->add(new ES256());
-        $coseAlgorithmManager->add(new ES256K());
-        $coseAlgorithmManager->add(new ES384());
-        $coseAlgorithmManager->add(new ES512());
+    private function createAlgorithmManager(): Manager
+    {
+        return Manager::create()
+            ->add(
+                ES256::create(),
+                ES256K::create(),
+                ES384::create(),
+                ES512::create(),
 
-        $coseAlgorithmManager->add(new RS256());
-        $coseAlgorithmManager->add(new RS384());
-        $coseAlgorithmManager->add(new RS512());
+                RS256::create(),
+                RS384::create(),
+                RS512::create(),
 
-        $coseAlgorithmManager->add(new PS256());
-        $coseAlgorithmManager->add(new PS384());
-        $coseAlgorithmManager->add(new PS512());
+                PS256::create(),
+                PS384::create(),
+                PS512::create(),
 
-        $coseAlgorithmManager->add(new ED256());
-        $coseAlgorithmManager->add(new ED512());
+                Ed256::create(),
+                Ed512::create(),
+            )
+            ;
     }
 
-    private function addAttestationTypes(AttestationStatementSupportManager $attestationStatementSupportManager) {
+    private function addAttestationTypes(AttestationStatementSupportManager $attestationStatementSupportManager): void
+    {
         //For now we just support the none attestations statement type as we do not request it
         $attestationStatementSupportManager->add(new NoneAttestationStatementSupport());
     }
