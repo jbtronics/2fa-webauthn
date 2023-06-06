@@ -8,8 +8,10 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 * Backward compatibility for existing registered U2F keys (from [r/u2f-two-factor-bundle](https://github.com/darookee/u2f-two-factor-bundle))
 
 ## Requirements
-* Symfony 5
-* PHP 7.4 or later
+* Symfony 6
+* PHP 8.1 or later
+
+If you want to use symfony 5.* and PHP 7.4, use the version 1.0.0 of this bundle.
 
 ## Installation
 1. Install the bundle `composer require jbtronics/2fa-webauthn`
