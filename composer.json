@@ -16,11 +16,12 @@
         }
     ],
     "require": {
-        "php": "^7.4.0|^8.0",
+        "php": "^8.1",
         "ext-json": "*",
-        "symfony/framework-bundle": "^5.0|^6.0",
-        "scheb/2fa-bundle": "^5.0.0|^6.0.0",
+        "symfony/framework-bundle": "^6.0",
+        "scheb/2fa-bundle": "^6.0.0",
         "web-auth/webauthn-lib": "^3.3|^4.0",
+        "web-auth/webauthn-symfony-bundle": "^4.2.0",
         "symfony/psr-http-message-bridge": "^2.1",
         "nyholm/psr7": "^1.5"
     },
