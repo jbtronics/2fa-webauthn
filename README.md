@@ -10,6 +10,7 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 ## Requirements
 * Symfony 6
 * PHP 8.1 or later
+* webauthn/webauthn-lib 4.0 or later
 
 If you want to use symfony 5.* and PHP 7.4, use the version 1.0.0 of this bundle.
 
