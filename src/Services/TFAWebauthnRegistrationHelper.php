@@ -8,6 +8,7 @@ use Jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Symfony\Bundle\SecurityBundle\Security;
 use Webauthn\AuthenticatorAttestationResponse;
+use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialParameters;
@@ -88,6 +89,9 @@ class TFAWebauthnRegistrationHelper
 
         $data->setTimeout($this->timeout);
         $data->excludeCredentials(...$excludedCredentials);
+
+        $data->setAttestation(PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE);
+        $data->setAuthenticatorSelection(AuthenticatorSelectionCriteria::create());
 
         //Save creation options in the session, so it can be used for validation later
         $this->webAuthnRequestStorage->setActiveRegistrationRequest($data);
