@@ -2,8 +2,13 @@
 
 class WebauthnTFA {
 
-// Decodes a Base64Url string
-    _base64UrlDecode = (input) => {
+    _b64UrlSafeEncode = (str) => {
+        const b64 = btoa(str);
+        return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    // Decodes a Base64Url string
+    _base64UrlSafeDecode = (input) => {
         input = input
             .replace(/-/g, '+')
             .replace(/_/g, '/');
@@ -20,13 +25,16 @@ class WebauthnTFA {
     };
 
     // Converts an array of bytes into a Base64Url string
-    _arrayToBase64String = (a) => btoa(String.fromCharCode(...a));
+    _arrayToBase64String = (a) => {
+        const str = String.fromCharCode(...a);
+        return this._b64UrlSafeEncode(str);
+    };
 
     // Prepares the public key options object returned by the Webauthn Framework
     _preparePublicKeyOptions = publicKey => {
         //Convert challenge from Base64Url string to Uint8Array
         publicKey.challenge = Uint8Array.from(
-            this._base64UrlDecode(publicKey.challenge),
+            this._base64UrlSafeDecode(publicKey.challenge),
             c => c.charCodeAt(0)
         );
 
@@ -48,7 +56,7 @@ class WebauthnTFA {
                     return {
                         ...data,
                         id: Uint8Array.from(
-                            this._base64UrlDecode(data.id),
+                            this._base64UrlSafeDecode(data.id),
                             c => c.charCodeAt(0)
                         ),
                     };
@@ -62,7 +70,7 @@ class WebauthnTFA {
                     return {
                         ...data,
                         id: Uint8Array.from(
-                            this._base64UrlDecode(data.id),
+                            this._base64UrlSafeDecode(data.id),
                             c => c.charCodeAt(0)
                         ),
                     };
