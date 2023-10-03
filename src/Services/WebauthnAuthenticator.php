@@ -7,8 +7,10 @@ use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthentic
 use jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
+use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\PublicKeyCredentialDescriptor;
+use Webauthn\PublicKeyCredentialOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialSourceRepository;
@@ -54,16 +56,23 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         //Generate a random challenge
         $challenge = random_bytes(32);
 
-        $request = new PublicKeyCredentialRequestOptions($challenge);
-        //Set options
-        $request->setRpId($this->rpID);
-        $request->setTimeout($this->timeout);
-        $request->setUserVerification($this->requireUserVerification);
+        //Add the U2F appID extension for backward compatibility
+        $extensions =  AuthenticationExtensionsClientInputs::create([
+            new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID())]);
 
-        $request->allowCredentials(...$allowedCredentials);
+        //Set options
+        $request = PublicKeyCredentialRequestOptions::create(
+            $challenge,
+            $this->rpID,
+            $allowedCredentials,
+            $this->requireUserVerification,
+            $this->timeout,
+            $extensions,
+        );
 
         //Add the U2F appID extension for backward compatibility
-        $request->addExtension(new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID()));
+        $request->extensions->extensions['appid'] = $this->u2fAppIDProvider->getAppID();
+        //$request->addExtension());
 
         return $request;
     }
@@ -75,7 +84,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
         //Check that the JSON encoded response is valid
         $publicKeyCredential = $publicKeyCredentialLoader->load($jsonResponse);
-        $authenticatorAssertionResponse = $publicKeyCredential->getResponse();
+        $authenticatorAssertionResponse = $publicKeyCredential->response;
         if (!$authenticatorAssertionResponse instanceof AuthenticatorAssertionResponse) {
             return false;
         }
@@ -90,11 +99,11 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         //Do the check
         try {
             $publicKeyCredentialSource = $validator->check(
-                $publicKeyCredential->getRawId(),
+                $publicKeyCredential->rawId,
                 $authenticatorAssertionResponse,
                 $request,
                 $psrRequest,
-                $user->getWebAuthnUser()->getId()
+                $user->getWebAuthnUser()->id
             );
 
             return true;
