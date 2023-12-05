@@ -38,6 +38,7 @@ services:
         $PSRRequestHelper: '@jbtronics_webauthn_tfa.psr_request_helper'
         $rpID: '%jbtronics_webauthn_tfa.rpID%'
         $timeout: '%jbtronics_webauthn_tfa.timeout%'
+        $logger: '@logger'
 
   jbtronics_webauthn_tfa.registration_helper:
     class: Jbtronics\TFAWebauthn\Services\TFAWebauthnRegistrationHelper

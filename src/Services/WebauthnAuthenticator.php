@@ -2,11 +2,11 @@
 
 namespace Jbtronics\TFAWebauthn\Services;
 
-use http\Client\Curl\User;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
 use jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
+use Psr\Log\LoggerInterface;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAssertionResponse;
@@ -26,9 +26,11 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
     protected WebauthnProvider $webauthnProvider;
     protected PSRRequestHelper $PSRRequestHelper;
 
+    protected ?LoggerInterface $logger;
+
 
     public function __construct(U2FAppIDProvider $u2FAppIDProvider, UserPublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
-        WebauthnProvider $webauthnProvider, PSRRequestHelper $PSRRequestHelper, int $timeout, ?string $rpID)
+        WebauthnProvider $webauthnProvider, PSRRequestHelper $PSRRequestHelper, int $timeout, ?string $rpID, ?LoggerInterface $logger = null)
     {
         $this->u2fAppIDProvider = $u2FAppIDProvider;
         $this->publicKeyCredentialSourceRepository = $publicKeyCredentialSourceRepository;
@@ -98,7 +100,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         //Do the check
         try {
             $publicKeyCredentialSource = $validator->check(
-                $publicKeyCredential->rawId,
+                $publicKeyCredential,
                 $authenticatorAssertionResponse,
                 $request,
                 $psrRequest,
@@ -108,6 +110,13 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
             return true;
         } catch (\Throwable $e) {
             //If any exception happens during the check, the check failed, and we do not log the user in
+
+            if ($this->logger) {
+                $this->logger->error('Webauthn authentication failed: ' . $e->getMessage(), [
+                    'exception' => $e,
+                ]);
+            }
+
             return false;
         }
     }
