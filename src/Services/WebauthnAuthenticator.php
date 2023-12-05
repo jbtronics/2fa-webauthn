@@ -108,7 +108,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
             return true;
         } catch (\Throwable $e) {
-            //If any exception happens during the check, the check failed and we do not log the user in
+            //If any exception happens during the check, the check failed, and we do not log the user in
             return false;
         }
     }

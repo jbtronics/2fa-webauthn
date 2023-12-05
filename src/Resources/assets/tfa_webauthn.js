@@ -139,7 +139,7 @@ class WebauthnTFA {
 
     registerForms()
     {
-        //Find all forms which have an data-webauthn-tfa-action attribute
+        //Find all forms which have a data-webauthn-tfa-action attribute
         const forms = document.querySelectorAll('form[data-webauthn-tfa-action]');
 
         forms.forEach((form) => {

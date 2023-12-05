@@ -112,7 +112,7 @@ class WebauthnProvider
 
     private function addAttestationTypes(AttestationStatementSupportManager $attestationStatementSupportManager): void
     {
-        //For now we just support the none attestations statement type as we do not request it
+        //For now, we just support the none attestations statement type as we do not request it
         $attestationStatementSupportManager->add(new NoneAttestationStatementSupport());
     }
 

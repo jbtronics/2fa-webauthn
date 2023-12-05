@@ -62,7 +62,7 @@ class WebAuthnRequestStorage
     }
 
     /**
-     * Retrieve the active PublicKeyCredentialCreationOptions from the session, or null if no was saved before
+     * Retrieve the active PublicKeyCredentialCreationOptions from the session, or null if now was saved before
      * @return PublicKeyCredentialCreationOptions|null
      */
     public function getActiveRegistrationRequest(): ?PublicKeyCredentialCreationOptions
