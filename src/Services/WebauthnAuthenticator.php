@@ -38,6 +38,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         $this->PSRRequestHelper = $PSRRequestHelper;
         $this->timeout = $timeout;
         $this->rpID = $rpID;
+        $this->logger = $logger;
     }
 
     public function generateAuthenticationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
