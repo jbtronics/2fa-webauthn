@@ -86,8 +86,21 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
         //Check that the JSON encoded response is valid
         $publicKeyCredential = $publicKeyCredentialLoader->load($jsonResponse);
+        //Find the credential source for the given credential id
+        $publicKeyCredentialSource = $this->publicKeyCredentialSourceRepository->findOneByCredentialId($publicKeyCredential->rawId);
+
+        if ($publicKeyCredentialSource === null) {
+            if ($this->logger) {
+                $this->logger->error('Webauthn authentication failed: No credential source found for the given credential id!');
+            }
+            return false;
+        }
+
         $authenticatorAssertionResponse = $publicKeyCredential->response;
         if (!$authenticatorAssertionResponse instanceof AuthenticatorAssertionResponse) {
+            if ($this->logger) {
+                $this->logger->error('Webauthn authentication failed: The given response is not an AuthenticatorAssertionResponse!');
+            }
             return false;
         }
 
@@ -101,7 +114,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         //Do the check
         try {
             $publicKeyCredentialSource = $validator->check(
-                $publicKeyCredential,
+                $publicKeyCredentialSource,
                 $authenticatorAssertionResponse,
                 $request,
                 $psrRequest,
