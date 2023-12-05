@@ -18,8 +18,8 @@
     "require": {
         "php": "^8.1",
         "ext-json": "*",
-        "symfony/framework-bundle": "^6.0",
-        "scheb/2fa-bundle": "^6.0.0",
+        "symfony/framework-bundle": "^6.0|^7.0",
+        "scheb/2fa-bundle": "^6.0.0|^7.0.0",
         "web-auth/webauthn-lib": "^4.7",
         "symfony/psr-http-message-bridge": "^2.1",
         "nyholm/psr7": "^1.5",
