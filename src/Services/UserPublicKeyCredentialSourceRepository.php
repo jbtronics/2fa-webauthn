@@ -29,7 +29,7 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
         $all_keys = $this->findAllForCurrentUser();
 
         foreach ($all_keys as $key) {
-            if ($key->getPublicKeyCredentialId() === $publicKeyCredentialId) {
+            if ($key->publicKeyCredentialId === $publicKeyCredentialId) {
                 return $key;
             }
         }
@@ -60,7 +60,7 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
                 new EmptyTrustPath(), //dummy
                 Uuid::v4(), //dummy,
                 base64_decode($legacyU2FKey->getPublicKey()),
-                $user->getWebAuthnUser()->getId(),
+                $user->getWebAuthnUser()->id,
                 0 //must be 0 to disable counter checking
             );
         }

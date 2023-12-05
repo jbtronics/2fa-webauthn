@@ -81,17 +81,15 @@ class TFAWebauthnRegistrationHelper
         );
 
         $data = new PublicKeyCredentialCreationOptions(
-            $this->webauthnProvider->getPublicKeyCredentialRpEntity(),
-            $user->getWebAuthnUser(),
-            $challenge,
-            $publicKeyCredentialParametersList,
+            rp: $this->webauthnProvider->getPublicKeyCredentialRpEntity(),
+            user: $user->getWebAuthnUser(),
+            challenge:  $challenge,
+            pubKeyCredParams:  $publicKeyCredentialParametersList,
+            authenticatorSelection: AuthenticatorSelectionCriteria::create(),
+            attestation: PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
+            excludeCredentials: $excludedCredentials,
+            timeout: $this->timeout,
         );
-
-        $data->setTimeout($this->timeout);
-        $data->excludeCredentials(...$excludedCredentials);
-
-        $data->setAttestation(PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE);
-        $data->setAuthenticatorSelection(AuthenticatorSelectionCriteria::create());
 
         //Save creation options in the session, so it can be used for validation later
         $this->webAuthnRequestStorage->setActiveRegistrationRequest($data);

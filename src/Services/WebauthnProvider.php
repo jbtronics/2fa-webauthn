@@ -24,7 +24,6 @@ use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSourceRepository;
-use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 
 /**
  * This service provides some common services of the web-authn library which are configured by the global configuration
@@ -66,24 +65,23 @@ class WebauthnProvider
         $this->publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader);
 
         //Create the assertion response validator
-        $tokenBindingHandler = new IgnoreTokenBindingHandler();
         $extensionOutputCheckerHandler = new ExtensionOutputCheckerHandler();
         $coseAlgorithmManager = $this->createAlgorithmManager();
 
         $this->assertionResponseValidator = new AuthenticatorAssertionResponseValidator(
-            $this->publicKeyCredentialSourceRepository,
-            $tokenBindingHandler,
-            $extensionOutputCheckerHandler,
-            $coseAlgorithmManager,
+            publicKeyCredentialSourceRepository:  $this->publicKeyCredentialSourceRepository,
+            tokenBindingHandler: null,
+            extensionOutputCheckerHandler: $extensionOutputCheckerHandler,
+            algorithmManager:  $coseAlgorithmManager,
         );
 
         //Create the attestation response validator
 
         $this->attestationResponseValidator = new AuthenticatorAttestationResponseValidator(
-            $attestationSupportStatementManager,
-            $this->publicKeyCredentialSourceRepository,
-            $tokenBindingHandler,
-            $extensionOutputCheckerHandler
+            attestationStatementSupportManager: $attestationSupportStatementManager,
+            publicKeyCredentialSourceRepository: $this->publicKeyCredentialSourceRepository,
+            tokenBindingHandler: null,
+            extensionOutputCheckerHandler: $extensionOutputCheckerHandler
         );
     }
 
