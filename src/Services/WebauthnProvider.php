@@ -23,38 +23,25 @@ use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\PublicKeyCredentialSourceRepository;
 
 /**
  * This service provides some common services of the web-authn library which are configured by the global configuration
  */
 class WebauthnProvider
 {
-    private PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository;
-
     private PublicKeyCredentialLoader $publicKeyCredentialLoader;
 
     private AuthenticatorAssertionResponseValidator $assertionResponseValidator;
     private AuthenticatorAttestationResponseValidator $attestationResponseValidator;
     private PublicKeyCredentialRpEntity $rpEntity;
 
-    private ?string $rpID;
-    private string $rpName;
-    private ?string $rpIcon;
-
-    public function __construct(PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository, ?string $rpID, string $rpName, ?string $rpIcon)
+    public function __construct(?string $rpID, string $rpName, ?string $rpIcon)
     {
-        $this->publicKeyCredentialSourceRepository = $publicKeyCredentialSourceRepository;
-
         //Create the RP entity
-        $this->rpID = $rpID;
-        $this->rpName = $rpName;
-        $this->rpIcon = $rpIcon;
-
         $this->rpEntity = new PublicKeyCredentialRpEntity(
-            $this->rpName,
-            $this->rpID,
-            $this->rpIcon
+            $rpName,
+            $rpID,
+            $rpIcon
         );
 
         //Create the public key credential loader
@@ -69,7 +56,7 @@ class WebauthnProvider
         $coseAlgorithmManager = $this->createAlgorithmManager();
 
         $this->assertionResponseValidator = new AuthenticatorAssertionResponseValidator(
-            publicKeyCredentialSourceRepository:  $this->publicKeyCredentialSourceRepository,
+            publicKeyCredentialSourceRepository:  null,
             tokenBindingHandler: null,
             extensionOutputCheckerHandler: $extensionOutputCheckerHandler,
             algorithmManager:  $coseAlgorithmManager,
@@ -79,7 +66,7 @@ class WebauthnProvider
 
         $this->attestationResponseValidator = new AuthenticatorAttestationResponseValidator(
             attestationStatementSupportManager: $attestationSupportStatementManager,
-            publicKeyCredentialSourceRepository: $this->publicKeyCredentialSourceRepository,
+            publicKeyCredentialSourceRepository: null,
             tokenBindingHandler: null,
             extensionOutputCheckerHandler: $extensionOutputCheckerHandler
         );

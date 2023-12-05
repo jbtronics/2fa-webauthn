@@ -2,6 +2,7 @@
 
 namespace Jbtronics\TFAWebauthn\Services;
 
+use http\Client\Curl\User;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthenticatorInterface;
 use jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
@@ -10,16 +11,14 @@ use Webauthn\AuthenticationExtensions\AuthenticationExtension;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\PublicKeyCredentialDescriptor;
-use Webauthn\PublicKeyCredentialOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialSourceRepository;
 
 class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 {
 
     private U2FAppIDProvider $u2fAppIDProvider;
-    private PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository;
+    private UserPublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository;
 
     protected string $requireUserVerification = "discouraged";
     protected int $timeout;
@@ -28,7 +27,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
     protected PSRRequestHelper $PSRRequestHelper;
 
 
-    public function __construct(U2FAppIDProvider $u2FAppIDProvider, PublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
+    public function __construct(U2FAppIDProvider $u2FAppIDProvider, UserPublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
         WebauthnProvider $webauthnProvider, PSRRequestHelper $PSRRequestHelper, int $timeout, ?string $rpID)
     {
         $this->u2fAppIDProvider = $u2FAppIDProvider;

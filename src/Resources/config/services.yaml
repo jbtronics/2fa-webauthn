@@ -62,7 +62,6 @@ services:
   jbtronics_webauthn_tfa.webauthn_provider:
     class: Jbtronics\TFAWebauthn\Services\WebauthnProvider
     arguments:
-      $publicKeyCredentialSourceRepository: '@jbtronics_webauthn_tfa.user_public_key_source_repo'
       $rpID: '%jbtronics_webauthn_tfa.rpID%'
       $rpName: '%jbtronics_webauthn_tfa.rpName%'
       $rpIcon: '%jbtronics_webauthn_tfa.rpIcon%'

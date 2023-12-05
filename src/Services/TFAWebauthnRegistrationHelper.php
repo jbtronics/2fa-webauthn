@@ -13,19 +13,18 @@ use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialSourceRepository;
 
 class TFAWebauthnRegistrationHelper
 {
     private int $timeout;
     private WebauthnProvider $webauthnProvider;
     private Security $security;
-    private PublicKeyCredentialSourceRepository $keyCredentialSourceRepository;
+    private UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository;
     private PSRRequestHelper $PSRRequestHelper;
     private WebAuthnRequestStorage $webAuthnRequestStorage;
 
     public function __construct(int $timeout, WebauthnProvider $webauthnProvider, Security $security,
-        PublicKeyCredentialSourceRepository $keyCredentialSourceRepository, PSRRequestHelper $PSRRequestHelper,
+        UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository, PSRRequestHelper $PSRRequestHelper,
         WebAuthnRequestStorage $webAuthnRequestStorage)
     {
         $this->timeout = $timeout;
@@ -116,7 +115,7 @@ class TFAWebauthnRegistrationHelper
     public function checkRegistrationResponse(string $jsonResponse): PublicKeyCredentialSource
     {
         $publicKeyCredential = $this->webauthnProvider->getPublicKeyCredentialLoader()->load($jsonResponse);
-        $authenticatorAttestationResponse = $publicKeyCredential->getResponse();
+        $authenticatorAttestationResponse = $publicKeyCredential->response;
 
         if (!$authenticatorAttestationResponse instanceof AuthenticatorAttestationResponse) {
             throw new \RuntimeException('The given response is not an AuthenticatorAttestationResponse!');

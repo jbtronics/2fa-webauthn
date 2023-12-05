@@ -7,14 +7,13 @@ use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Uid\Uuid;
 use Webauthn\PublicKeyCredentialSource;
-use Webauthn\PublicKeyCredentialSourceRepository;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\EmptyTrustPath;
 
 /**
  * This class provides the public key credential sources, normalize legacy U2F keys and merges U2F and Webauthn keys.
  */
-class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSourceRepository
+class UserPublicKeyCredentialSourceRepository
 {
     private Security $security;
 
@@ -76,10 +75,5 @@ class UserPublicKeyCredentialSourceRepository implements PublicKeyCredentialSour
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
         return $this->findAllForCurrentUser();
-    }
-
-    public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
-    {
-        // TODO: Implement saveCredentialSource() method.
     }
 }
