@@ -111,14 +111,16 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
             throw new \RuntimeException('Could not get current request as PSR7 request!');
         }
 
+        $host = $psrRequest->getUri()->getHost();
+
         //Do the check
         try {
             $publicKeyCredentialSource = $validator->check(
-                $publicKeyCredentialSource,
-                $authenticatorAssertionResponse,
-                $request,
-                $psrRequest,
-                $user->getWebAuthnUser()->id
+                credentialId: $publicKeyCredentialSource,
+                authenticatorAssertionResponse:  $authenticatorAssertionResponse,
+                publicKeyCredentialRequestOptions:  $request,
+                request: $host,
+                userHandle: $user->getWebAuthnUser()->id
             );
 
             return true;
