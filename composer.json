@@ -24,7 +24,7 @@
         "psr/log": "^3.0.0|^2.0.0",
         "symfony/psr-http-message-bridge": "^2.1",
         "nyholm/psr7": "^1.5",
-        "symfony/uid": "^6.0"
+        "symfony/uid": "^6.0|^7.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
