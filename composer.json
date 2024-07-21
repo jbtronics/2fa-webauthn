@@ -22,7 +22,7 @@
         "scheb/2fa-bundle": "^6.0.0|^7.0.0",
         "web-auth/webauthn-lib": "^4.7",
         "psr/log": "^3.0.0|^2.0.0",
-        "symfony/psr-http-message-bridge": "^2.1",
+        "symfony/psr-http-message-bridge": "^2.1|^6.1|^7.0",
         "nyholm/psr7": "^1.5",
         "symfony/uid": "^6.0|^7.0"
     },
