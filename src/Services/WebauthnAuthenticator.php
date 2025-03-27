@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
 use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAssertionResponse;
+use Webauthn\Exception\InvalidDataException;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
@@ -85,7 +86,15 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         $validator = $this->webauthnProvider->getAuthenticatorAssertionResponseValidator();
 
         //Check that the JSON encoded response is valid
-        $publicKeyCredential = $publicKeyCredentialLoader->load($jsonResponse);
+        try {
+            $publicKeyCredential = $publicKeyCredentialLoader->load($jsonResponse);
+        } catch (InvalidDataException) {
+            if ($this->logger) {
+                $this->logger->error('Webauthn authentication failed: Unable to load JSON data');
+            }
+            return false;
+        }
+
         //Find the credential source for the given credential id
         $publicKeyCredentialSource = $this->publicKeyCredentialSourceRepository->findOneByCredentialId($publicKeyCredential->rawId);
 
