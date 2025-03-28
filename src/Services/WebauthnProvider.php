@@ -23,6 +23,8 @@ use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRpEntity;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Webauthn\Event\NullEventDispatcher;
 
 /**
  * This service provides some common services of the web-authn library which are configured by the global configuration
@@ -35,7 +37,8 @@ class WebauthnProvider
     private AuthenticatorAttestationResponseValidator $attestationResponseValidator;
     private PublicKeyCredentialRpEntity $rpEntity;
 
-    public function __construct(?string $rpID, string $rpName, ?string $rpIcon)
+    public function __construct(?string $rpID, string $rpName, ?string $rpIcon,
+                                EventDispatcherInterface $eventDispatcher)
     {
         //Create the RP entity
         $this->rpEntity = new PublicKeyCredentialRpEntity(
@@ -43,6 +46,8 @@ class WebauthnProvider
             $rpID,
             $rpIcon
         );
+
+        $this->eventDispatcher = $eventDispatcher ?? New NullEventDispatcher();
 
         //Create the public key credential loader
         $attestationSupportStatementManager = new AttestationStatementSupportManager();
@@ -60,6 +65,7 @@ class WebauthnProvider
             tokenBindingHandler: null,
             extensionOutputCheckerHandler: $extensionOutputCheckerHandler,
             algorithmManager:  $coseAlgorithmManager,
+            eventDispatcher: $this->eventDispatcher
         );
 
         //Create the attestation response validator
@@ -68,7 +74,8 @@ class WebauthnProvider
             attestationStatementSupportManager: $attestationSupportStatementManager,
             publicKeyCredentialSourceRepository: null,
             tokenBindingHandler: null,
-            extensionOutputCheckerHandler: $extensionOutputCheckerHandler
+            extensionOutputCheckerHandler: $extensionOutputCheckerHandler,
+            eventDispatcher: $this->eventDispatcher
         );
     }
 
