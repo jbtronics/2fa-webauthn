@@ -24,7 +24,7 @@ class TFAWebauthnRegistrationHelper
         private readonly Security $security,
         private readonly UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository,
         private readonly PSRRequestHelper $PSRRequestHelper,
-        private readonly WebAuthnRequestStorage $webAuthnRequestStorage
+        private readonly WebAuthnRequestStorage $requestStorage
     )
     {
     }
@@ -85,7 +85,7 @@ class TFAWebauthnRegistrationHelper
         );
 
         //Save creation options in the session, so it can be used for validation later
-        $this->webAuthnRequestStorage->setActiveRegistrationRequest($data);
+        $this->requestStorage->setActiveRegistrationRequest($data);
 
         return $data;
     }
@@ -128,7 +128,7 @@ class TFAWebauthnRegistrationHelper
             throw new \RuntimeException('Could not get the current request!');
         }
 
-        $activeRegistration = $this->webAuthnRequestStorage->getActiveRegistrationRequest();
+        $activeRegistration = $this->requestStorage->getActiveRegistrationRequest();
         if ($activeRegistration === null) {
             throw new \RuntimeException('No active registration request found!');
         }
