@@ -22,7 +22,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('jbtronics_webauthn_tfa.u2f_app_id_provider', Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider::class)
         ->args([
             '$requestStack' => service('request_stack'),
-            '$override' => param('jbtronics_webauthn_tfa.U2FAppID'),
+            '$appIDoverride' => param('jbtronics_webauthn_tfa.U2FAppID'),
         ]);
 
     $services
