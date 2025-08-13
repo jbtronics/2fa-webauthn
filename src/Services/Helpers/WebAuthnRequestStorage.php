@@ -2,6 +2,7 @@
 
 namespace Jbtronics\TFAWebauthn\Services\Helpers;
 
+use Jbtronics\TFAWebauthn\Services\WebauthnProvider;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
@@ -15,11 +16,9 @@ class WebAuthnRequestStorage
     private const AUTH_KEY = 'jbtronics_webauthn_tfa.auth_request';
     private const REG_KEY = 'jbtronics_webauthn_tfa.reg_request';
 
-    private RequestStack $requestStack;
 
-    public function __construct(RequestStack $requestStack)
+    public function __construct(private readonly RequestStack $requestStack, private readonly WebauthnProvider $webauthnProvider)
     {
-        $this->requestStack = $requestStack;
     }
 
     /**
@@ -29,8 +28,13 @@ class WebAuthnRequestStorage
      */
     public function setActiveAuthRequest(?PublicKeyCredentialRequestOptions $authRequest): void
     {
+        $serializer = $this->webauthnProvider->getWebauthnSerializer();
+
         $session = $this->requestStack->getSession();
-        $session->set(self::AUTH_KEY, json_encode($authRequest, JSON_THROW_ON_ERROR));
+        $session->set(self::AUTH_KEY, $serializer->serialize($authRequest, 'json', [
+            'skip_null_values' => true, // Highly recommended!
+            'json_encode_options' => JSON_THROW_ON_ERROR
+        ]));
     }
 
     /**
@@ -46,7 +50,10 @@ class WebAuthnRequestStorage
             return null;
         }
 
-        return PublicKeyCredentialRequestOptions::createFromString($stored);
+        // Deserialize the stored JSON string into a PublicKeyCredentialRequestOptions object
+        return $this->webauthnProvider->getWebauthnSerializer()->deserialize($stored, PublicKeyCredentialRequestOptions::class, 'json', [
+            'json_decode_options' => JSON_THROW_ON_ERROR
+        ]);
     }
 
     /**
@@ -57,8 +64,13 @@ class WebAuthnRequestStorage
      */
     public function setActiveRegistrationRequest(?PublicKeyCredentialCreationOptions $registrationRequest): void
     {
+        $serializer = $this->webauthnProvider->getWebauthnSerializer();
         $session = $this->requestStack->getSession();
-        $session->set(self::REG_KEY, json_encode($registrationRequest, JSON_THROW_ON_ERROR));
+
+        $session->set(self::REG_KEY, $serializer->serialize($registrationRequest, 'json', [
+            'skip_null_values' => true, // Highly recommended!
+            'json_encode_options' => JSON_THROW_ON_ERROR
+        ]));
     }
 
     /**
@@ -74,7 +86,9 @@ class WebAuthnRequestStorage
             return null;
         }
 
-        return PublicKeyCredentialCreationOptions::createFromString($stored);
+        return $this->webauthnProvider->getWebauthnSerializer()->deserialize($stored, PublicKeyCredentialCreationOptions::class, 'json', [
+            'json_decode_options' => JSON_THROW_ON_ERROR
+        ]);
     }
 
 

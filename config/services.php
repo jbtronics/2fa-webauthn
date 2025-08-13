@@ -69,6 +69,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('jbtronics_webauthn_tfa.webauthn_request_storage', Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage::class)
         ->args([
             '$requestStack' => service('request_stack'),
+            '$webauthnProvider' => service('jbtronics_webauthn_tfa.webauthn_provider'),
         ]);
 
     $services
