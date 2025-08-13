@@ -5,10 +5,13 @@ namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Jbtronics\TFAWebauthn\Services\WebauthnAuthenticator;
+use Jbtronics\TFAWebauthn\Services\WebauthnProvider;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Twig\Environment;
 
 final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
@@ -17,10 +20,11 @@ final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
     private Environment $twig;
     private WebauthnAuthenticatorInterface $authenticator;
     private WebAuthnRequestStorage $requestStorage;
+    private WebauthnProvider $webauthnProvider;
 
     private string $template;
 
-    public function __construct(TokenStorageInterface $tokenStorage, Environment $twig, WebauthnAuthenticator $authenticator, string $template, WebAuthnRequestStorage $webAuthnRequestStorage)
+    public function __construct(TokenStorageInterface $tokenStorage, Environment $twig, WebauthnAuthenticator $authenticator, string $template, WebAuthnRequestStorage $webAuthnRequestStorage, WebauthnProvider $webauthnProvider)
     {
         $this->tokenStorage = $tokenStorage;
         $this->twig = $twig;
@@ -28,6 +32,7 @@ final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
 
         $this->template = $template;
         $this->requestStorage = $webAuthnRequestStorage;
+        $this->webauthnProvider = $webauthnProvider;
     }
 
     public function renderForm(Request $request, array $templateVars): Response
@@ -46,7 +51,12 @@ final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
         $requestData = $this->authenticator->generateAuthenticationRequest($user);
         $this->requestStorage->setActiveAuthRequest($requestData);
 
-        $templateVars['webauthn_request_data'] = json_encode($requestData, JSON_THROW_ON_ERROR);
+        $serializer = $this->webauthnProvider->getWebauthnSerializer();
+
+        $templateVars['webauthn_request_data'] = $serializer->serialize($requestData, 'json', [
+            AbstractObjectNormalizer::SKIP_NULL_VALUES => true, // Highly recommended!
+            JsonEncode::OPTIONS => JSON_THROW_ON_ERROR, // Optional
+        ]);
 
         $content = $this->twig->render($this->template, $templateVars);
 

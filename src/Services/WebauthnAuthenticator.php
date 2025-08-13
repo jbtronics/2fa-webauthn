@@ -7,10 +7,10 @@ use Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn\WebauthnAuthentic
 use jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\U2FAppIDProvider;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
-use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticatorAssertionResponse;
-use Webauthn\Exception\InvalidDataException;
+use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
@@ -60,37 +60,36 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         $challenge = random_bytes(32);
 
         //Add the U2F appID extension for backward compatibility
-        $extensions =  AuthenticationExtensionsClientInputs::create([
-            new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID())]);
+        $extensions =  [
+            new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID())
+        ];
 
         //Set options
         $request = PublicKeyCredentialRequestOptions::create(
-            $challenge,
-            $this->rpID,
-            $allowedCredentials,
-            $this->requireUserVerification,
-            $this->timeout,
-            $extensions,
+            challenge: $challenge,
+            rpId: $this->rpID,
+            allowCredentials: $allowedCredentials,
+            userVerification: $this->requireUserVerification,
+            timeout: $this->timeout,
+            extensions: $extensions,
         );
-
-        //Add the U2F appID extension for backward compatibility
-        $request->extensions->extensions['appid'] = $this->u2fAppIDProvider->getAppID();
-        //$request->addExtension());
 
         return $request;
     }
 
-    public function checkAuthenticationResponse(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $jsonResponse): bool
+    public function checkAuthenticationResponse(TwoFactorInterface $user, PublicKeyCredentialRequestOptions $request, string $response): bool
     {
-        $publicKeyCredentialLoader = $this->webauthnProvider->getPublicKeyCredentialLoader();
+        $publicKeySerializer = $this->webauthnProvider->getWebauthnSerializer();
         $validator = $this->webauthnProvider->getAuthenticatorAssertionResponseValidator();
 
         //Check that the JSON encoded response is valid
         try {
-            $publicKeyCredential = $publicKeyCredentialLoader->load($jsonResponse);
-        } catch (InvalidDataException) {
+            $publicKeyCredential = $publicKeySerializer->deserialize($response, PublicKeyCredential::class, 'json');
+        } catch (ExceptionInterface $exception) {
             if ($this->logger) {
-                $this->logger->error('Webauthn authentication failed: Unable to load JSON data');
+                $this->logger->error('Webauthn authentication failed: Unable to load JSON data. Message: ' . $exception->getMessage(), [
+                    'exception' => $exception,
+                ]);
             }
             return false;
         }
@@ -125,10 +124,10 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         //Do the check
         try {
             $publicKeyCredentialSource = $validator->check(
-                credentialId: $publicKeyCredentialSource,
+                publicKeyCredentialSource: $publicKeyCredentialSource,
                 authenticatorAssertionResponse:  $authenticatorAssertionResponse,
                 publicKeyCredentialRequestOptions:  $request,
-                request: $host,
+                host: $host,
                 userHandle: $user->getWebAuthnUser()->id
             );
 

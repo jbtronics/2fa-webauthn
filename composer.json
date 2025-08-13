@@ -2,7 +2,7 @@
     "name": "jbtronics/2fa-webauthn",
     "type": "symfony-bundle",
     "license": "MIT",
-    "description": "Webauthn Two-Factor-Authentictication Plugin for scheb/2fa",
+    "description": "Webauthn Two-Factor-Authentication Plugin for scheb/2fa",
     "keywords": ["2fa", "webauthn", "two-factor-authentication", "scheb-2fa", "symfony", "symfony-bundle"],
     "autoload": {
         "psr-4": {
@@ -16,11 +16,11 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-json": "*",
         "symfony/framework-bundle": "^6.0|^7.0",
         "scheb/2fa-bundle": "^6.0.0|^7.0.0",
-        "web-auth/webauthn-lib": "^4.7",
+        "web-auth/webauthn-lib": "^5.2",
         "psr/log": "^3.0.0|^2.0.0",
         "symfony/psr-http-message-bridge": "^2.1|^6.1|^7.0",
         "nyholm/psr7": "^1.5",

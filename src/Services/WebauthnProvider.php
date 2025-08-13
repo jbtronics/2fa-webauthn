@@ -15,13 +15,15 @@ use Cose\Algorithm\Signature\RSA\PS512;
 use Cose\Algorithm\Signature\RSA\RS256;
 use Cose\Algorithm\Signature\RSA\RS384;
 use Cose\Algorithm\Signature\RSA\RS512;
+use Symfony\Component\Serializer\SerializerInterface;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponseValidator;
-use Webauthn\PublicKeyCredentialLoader;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
+use Webauthn\Denormalizer\WebauthnSerializerFactory;
 use Webauthn\PublicKeyCredentialRpEntity;
 
 /**
@@ -29,7 +31,8 @@ use Webauthn\PublicKeyCredentialRpEntity;
  */
 class WebauthnProvider
 {
-    private PublicKeyCredentialLoader $publicKeyCredentialLoader;
+
+    private SerializerInterface $serializer;
 
     private AuthenticatorAssertionResponseValidator $assertionResponseValidator;
     private AuthenticatorAttestationResponseValidator $attestationResponseValidator;
@@ -49,27 +52,25 @@ class WebauthnProvider
         $this->addAttestationTypes($attestationSupportStatementManager);
         $attestationObjectLoader = new AttestationObjectLoader($attestationSupportStatementManager);
 
-        $this->publicKeyCredentialLoader = new PublicKeyCredentialLoader($attestationObjectLoader);
+        $factory = new WebauthnSerializerFactory($attestationSupportStatementManager);
+        $this->serializer = $factory->create();
 
         //Create the assertion response validator
         $extensionOutputCheckerHandler = new ExtensionOutputCheckerHandler();
         $coseAlgorithmManager = $this->createAlgorithmManager();
 
-        $this->assertionResponseValidator = new AuthenticatorAssertionResponseValidator(
-            publicKeyCredentialSourceRepository:  null,
-            tokenBindingHandler: null,
-            extensionOutputCheckerHandler: $extensionOutputCheckerHandler,
-            algorithmManager:  $coseAlgorithmManager,
-        );
+        $csmFactory = new CeremonyStepManagerFactory();
+        $csmFactory->setAttestationStatementSupportManager($attestationSupportStatementManager);
+        $csmFactory->setExtensionOutputCheckerHandler($extensionOutputCheckerHandler);
+
+        $creationCSM = $csmFactory->creationCeremony();
+        $requestCSM = $csmFactory->requestCeremony();
+
+        $this->assertionResponseValidator = new AuthenticatorAssertionResponseValidator($requestCSM);
 
         //Create the attestation response validator
 
-        $this->attestationResponseValidator = new AuthenticatorAttestationResponseValidator(
-            attestationStatementSupportManager: $attestationSupportStatementManager,
-            publicKeyCredentialSourceRepository: null,
-            tokenBindingHandler: null,
-            extensionOutputCheckerHandler: $extensionOutputCheckerHandler
-        );
+        $this->attestationResponseValidator = new AuthenticatorAttestationResponseValidator($creationCSM);
     }
 
     private function createAlgorithmManager(): Manager
@@ -111,9 +112,9 @@ class WebauthnProvider
         return $this->assertionResponseValidator;
     }
 
-    public function getPublicKeyCredentialLoader(): PublicKeyCredentialLoader
+    public function getWebauthnSerializer(): SerializerInterface
     {
-        return $this->publicKeyCredentialLoader;
+        return $this->serializer;
     }
 
     public function getAuthenticatorAttestationResponseValidator(): AuthenticatorAttestationResponseValidator

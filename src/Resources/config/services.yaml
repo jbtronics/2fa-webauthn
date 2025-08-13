@@ -23,6 +23,7 @@ services:
       $template: '%jbtronics_webauthn_tfa.template%'
       $webAuthnRequestStorage: '@jbtronics_webauthn_tfa.webauthn_request_storage'
       $authenticator: '@jbtronics_webauthn_tfa.webauthn_authenticator'
+      $webauthnProvider: '@jbtronics_webauthn_tfa.webauthn_provider'
 
   jbtronics_webauthn_tfa.psr_request_helper:
     class: Jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper

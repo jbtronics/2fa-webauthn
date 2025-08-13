@@ -7,8 +7,11 @@ use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialParameters;
@@ -79,7 +82,7 @@ class TFAWebauthnRegistrationHelper
             $this->keyCredentialSourceRepository->findAllForUserEntity($user->getWebAuthnUser())
         );
 
-        $data = new PublicKeyCredentialCreationOptions(
+        $data = PublicKeyCredentialCreationOptions::create(
             rp: $this->webauthnProvider->getPublicKeyCredentialRpEntity(),
             user: $user->getWebAuthnUser(),
             challenge:  $challenge,
@@ -103,7 +106,14 @@ class TFAWebauthnRegistrationHelper
      */
     public function generateRegistrationRequestAsJSON(?TwoFactorInterface $user = null): string
     {
-        return json_encode($this->generateRegistrationRequest($user), JSON_THROW_ON_ERROR);
+        return $this->webauthnProvider->getWebauthnSerializer()->serialize(
+            $this->generateRegistrationRequest($user),
+            'json',
+            [
+                AbstractObjectNormalizer::SKIP_NULL_VALUES => true, // Highly recommended!
+                JsonEncode::OPTIONS => JSON_THROW_ON_ERROR, // Optional
+            ]
+        );
     }
 
     /**
@@ -114,7 +124,8 @@ class TFAWebauthnRegistrationHelper
      */
     public function checkRegistrationResponse(string $jsonResponse): PublicKeyCredentialSource
     {
-        $publicKeyCredential = $this->webauthnProvider->getPublicKeyCredentialLoader()->load($jsonResponse);
+        $serializer = $this->webauthnProvider->getWebauthnSerializer();
+        $publicKeyCredential = $serializer->deserialize($jsonResponse, PublicKeyCredential::class, 'json');
         $authenticatorAttestationResponse = $publicKeyCredential->response;
 
         if (!$authenticatorAttestationResponse instanceof AuthenticatorAttestationResponse) {
@@ -132,9 +143,9 @@ class TFAWebauthnRegistrationHelper
         }
 
         return $this->webauthnProvider->getAuthenticatorAttestationResponseValidator()->check(
-            $authenticatorAttestationResponse,
-            $activeRegistration,
-            $serverRequest
+            authenticatorAttestationResponse:  $authenticatorAttestationResponse,
+            publicKeyCredentialCreationOptions:  $activeRegistration,
+            host: $serverRequest->getUri()->getHost(),
         );
     }
 
