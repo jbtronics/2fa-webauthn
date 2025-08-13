@@ -15,7 +15,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             '$authenticator' => service('jbtronics_webauthn_tfa.webauthn_authenticator'),
             '$formRenderer' => service('jbtronics_webauthn_tfa.form_renderer'),
-            '$webAuthnRequestStorage' => service('jbtronics_webauthn_tfa.webauthn_request_storage'),
+            '$requestStorage' => service('jbtronics_webauthn_tfa.webauthn_request_storage'),
         ]);
 
     $services
@@ -31,7 +31,7 @@ return static function (ContainerConfigurator $container): void {
             '$tokenStorage' => service('security.token_storage'),
             '$twig' => service('twig'),
             '$template' => param('jbtronics_webauthn_tfa.template'),
-            '$webAuthnRequestStorage' => service('jbtronics_webauthn_tfa.webauthn_request_storage'),
+            '$requestStorage' => service('jbtronics_webauthn_tfa.webauthn_request_storage'),
             '$authenticator' => service('jbtronics_webauthn_tfa.webauthn_authenticator'),
             '$webauthnProvider' => service('jbtronics_webauthn_tfa.webauthn_provider'),
         ]);
@@ -61,7 +61,7 @@ return static function (ContainerConfigurator $container): void {
             '$timeout' => param('jbtronics_webauthn_tfa.timeout'),
             '$webauthnProvider' => service('jbtronics_webauthn_tfa.webauthn_provider'),
             '$security' => service('security.helper'),
-            '$webAuthnRequestStorage' => service('jbtronics_webauthn_tfa.webauthn_request_storage'),
+            '$requestStorage' => service('jbtronics_webauthn_tfa.webauthn_request_storage'),
             '$keyCredentialSourceRepository' => service('jbtronics_webauthn_tfa.user_public_key_source_repo'),
         ]);
 

@@ -10,13 +10,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class U2FAppIDProvider
 {
-    private ?string $appID_override = null;
-    private RequestStack $requestStack;
-
-    public function __construct(RequestStack $requestStack, ?string $override = null)
+    public function __construct(private readonly RequestStack $requestStack, private readonly ?string $appIDoverride = null)
     {
-        $this->appID_override = $override;
-        $this->requestStack = $requestStack;
     }
 
     /**
@@ -43,8 +38,8 @@ class U2FAppIDProvider
     public function getAppID(): string
     {
         //If we have a custom appID, use that
-        if ($this->appID_override) {
-            return $this->appID_override;
+        if ($this->appIDoverride) {
+            return $this->appIDoverride;
         }
 
         //Otherwise, use the current request to generate the appID

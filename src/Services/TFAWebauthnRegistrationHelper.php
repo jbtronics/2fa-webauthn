@@ -19,23 +19,14 @@ use Webauthn\PublicKeyCredentialSource;
 
 class TFAWebauthnRegistrationHelper
 {
-    private int $timeout;
-    private WebauthnProvider $webauthnProvider;
-    private Security $security;
-    private UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository;
-    private PSRRequestHelper $PSRRequestHelper;
-    private WebAuthnRequestStorage $webAuthnRequestStorage;
-
-    public function __construct(int $timeout, WebauthnProvider $webauthnProvider, Security $security,
-        UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository, PSRRequestHelper $PSRRequestHelper,
-        WebAuthnRequestStorage $webAuthnRequestStorage)
+    public function __construct(private readonly int $timeout,
+        private readonly WebauthnProvider $webauthnProvider,
+        private readonly Security $security,
+        private readonly UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository,
+        private readonly PSRRequestHelper $PSRRequestHelper,
+        private readonly WebAuthnRequestStorage $webAuthnRequestStorage
+    )
     {
-        $this->timeout = $timeout;
-        $this->webauthnProvider = $webauthnProvider;
-        $this->security = $security;
-        $this->keyCredentialSourceRepository = $keyCredentialSourceRepository;
-        $this->PSRRequestHelper = $PSRRequestHelper;
-        $this->webAuthnRequestStorage = $webAuthnRequestStorage;
     }
 
     /**

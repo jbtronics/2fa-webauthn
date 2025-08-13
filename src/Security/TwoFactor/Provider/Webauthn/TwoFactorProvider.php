@@ -12,15 +12,12 @@ use Webauthn\PublicKeyCredentialLoader;
 
 final class TwoFactorProvider implements TwoFactorProviderInterface
 {
-    private WebauthnFormRenderer $formRenderer;
-    private WebauthnAuthenticatorInterface $authenticator;
-    private WebAuthnRequestStorage $requestStorage;
 
-    public function __construct(WebauthnFormRenderer $formRenderer, WebauthnAuthenticatorInterface $authenticator, WebAuthnRequestStorage $webAuthnRequestStorage)
+    public function __construct(private readonly WebauthnFormRenderer $formRenderer,
+        private readonly WebauthnAuthenticatorInterface $authenticator,
+        private readonly WebAuthnRequestStorage $requestStorage
+    )
     {
-        $this->formRenderer = $formRenderer;
-        $this->authenticator = $authenticator;
-        $this->requestStorage = $webAuthnRequestStorage;
     }
 
 

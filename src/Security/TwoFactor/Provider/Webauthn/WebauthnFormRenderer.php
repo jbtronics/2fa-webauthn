@@ -16,23 +16,15 @@ use Twig\Environment;
 
 final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
 {
-    private TokenStorageInterface $tokenStorage;
-    private Environment $twig;
-    private WebauthnAuthenticatorInterface $authenticator;
-    private WebAuthnRequestStorage $requestStorage;
-    private WebauthnProvider $webauthnProvider;
-
-    private string $template;
-
-    public function __construct(TokenStorageInterface $tokenStorage, Environment $twig, WebauthnAuthenticator $authenticator, string $template, WebAuthnRequestStorage $webAuthnRequestStorage, WebauthnProvider $webauthnProvider)
+    public function __construct(
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly Environment $twig,
+        private readonly WebauthnAuthenticator $authenticator,
+        private readonly string $template,
+        private readonly WebAuthnRequestStorage $requestStorage,
+        private readonly WebauthnProvider $webauthnProvider
+    )
     {
-        $this->tokenStorage = $tokenStorage;
-        $this->twig = $twig;
-        $this->authenticator = $authenticator;
-
-        $this->template = $template;
-        $this->requestStorage = $webAuthnRequestStorage;
-        $this->webauthnProvider = $webauthnProvider;
     }
 
     public function renderForm(Request $request, array $templateVars): Response
