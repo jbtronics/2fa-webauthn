@@ -1,18 +1,19 @@
-# Webauthn Two-Factor-Authentictication Plugin for scheb/2fa
+# Webauthn Two-Factor-Authentication Plugin for scheb/2fa
 
 This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) that adds support for Webauthn authenticators (like a Yubikey) as a second factor.
 
-## Feautures
+## Features
 * Support of all webauthn authenticators as second factor
 * Supports multiple authenticators per user
 * Backward compatibility for existing registered U2F keys (from [r/u2f-two-factor-bundle](https://github.com/darookee/u2f-two-factor-bundle))
 
 ## Requirements
-* Symfony 6
-* PHP 8.1 or later
-* webauthn/webauthn-lib 4.0 or later
+* Symfony 7
+* PHP 8.2 or later
+* webauthn/webauthn-lib 5.0 or later
 
 If you want to use symfony 5.* and PHP 7.4, use the version 1.0.0 of this bundle.
+If you want to use PHP 8.1 and webauthn/webauthn-lib 4.*, use the version 2.0.0 of this bundle.
 
 ## Installation
 1. Install the bundle `composer require jbtronics/2fa-webauthn`
@@ -87,28 +88,19 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
-use Webauthn\PublicKeyCredentialSource as BasePublicKeyCredentialSource;
-use Webauthn\TrustPath\TrustPath;
 
-/**
- * @ORM\Table(name="webauthn_keys")
- * @ORM\Entity()
- */
+use Webauthn\PublicKeyCredentialSource as BasePublicKeyCredentialSource;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'webauthn_keys')]
 class WebAuthnKey extends BasePublicKeyCredentialSource
 {
-    /**
-     * @var string
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue]
     private $id;
     
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="webauthnKeys")
-     **/
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'webauthn_keys')]
     protected ?User $user = null;
     
     //You can declare additional fields too, if you want to store additional information about the key (like a name)
@@ -122,17 +114,20 @@ class WebAuthnKey extends BasePublicKeyCredentialSource
     
     public static function fromRegistration(BasePublicKeyCredentialSource $registration): self
     {
-        return new static(
-            $registration->getPublicKeyCredentialId(),
-            $registration->getType(),
-            $registration->getTransports(),
-            $registration->getAttestationType(),
-            $registration->getTrustPath(),
-            $registration->getAaguid(),
-            $registration->getCredentialPublicKey(),
-            $registration->getUserHandle(),
-            $registration->getCounter(),
-            $registration->getOtherUI()
+        return new self(
+            publicKeyCredentialId:  $registration->publicKeyCredentialId,
+            type:  $registration->type,
+            transports: $registration->transports,
+            attestationType:  $registration->attestationType,
+            trustPath:  $registration->trustPath,
+            aaguid:  $registration->aaguid,
+            credentialPublicKey:  $registration->credentialPublicKey,
+            userHandle:  $registration->userHandle,
+            counter:  $registration->counter,
+            otherUI:  $registration->otherUI,
+            backupEligible:  $registration->backupEligible,
+            backupStatus:  $registration->backupStatus,
+            uvInitialized:  $registration->uvInitialized,
         );
     }
 }
@@ -140,7 +135,7 @@ class WebAuthnKey extends BasePublicKeyCredentialSource
 ```
 
 3. Include javascript frontend code into your project: For webauthn we need some javascript code to interact with the authenticators.
-Copy the file from `src/Resources/assets/tfa_webauthn.js` to your project and include it either by loading it via a `<script>` tag or by including it in your webpack using `.addEntry()`.
+Copy the file from `assets/tfa_webauthn.js` to your project and include it either by loading it via a `<script>` tag or by including it in your webpack using `.addEntry()`.
 
 4. Add configuration file `config/packages/jbtronics_2fa_webauthn.yaml`:
 ```yaml
