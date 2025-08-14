@@ -29,7 +29,7 @@ use Webauthn\PublicKeyCredentialRpEntity;
 /**
  * This service provides some common services of the web-authn library which are configured by the global configuration
  */
-class WebauthnProvider
+readonly class WebauthnProvider
 {
 
     private SerializerInterface $serializer;

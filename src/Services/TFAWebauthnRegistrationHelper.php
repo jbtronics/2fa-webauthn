@@ -17,14 +17,14 @@ use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialSource;
 
-class TFAWebauthnRegistrationHelper
+readonly class TFAWebauthnRegistrationHelper
 {
-    public function __construct(private readonly int $timeout,
-        private readonly WebauthnProvider $webauthnProvider,
-        private readonly Security $security,
-        private readonly UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository,
-        private readonly PSRRequestHelper $PSRRequestHelper,
-        private readonly WebAuthnRequestStorage $requestStorage
+    public function __construct(private int $timeout,
+        private WebauthnProvider $webauthnProvider,
+        private Security $security,
+        private UserPublicKeyCredentialSourceRepository $keyCredentialSourceRepository,
+        private PSRRequestHelper $PSRRequestHelper,
+        private WebAuthnRequestStorage $requestStorage
     )
     {
     }

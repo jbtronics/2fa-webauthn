@@ -7,12 +7,11 @@ use Nyholm\Psr7\ServerRequest;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class PSRRequestHelper
+readonly class PSRRequestHelper
 {
 
-    public function __construct(private readonly RequestStack $requestStack)
+    public function __construct(private RequestStack $requestStack)
     {
-        $this->requestStack = $requestStack;
     }
 
     /**

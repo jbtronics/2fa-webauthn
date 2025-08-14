@@ -10,12 +10,12 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorProviderInterface
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\PublicKeyCredentialLoader;
 
-final class TwoFactorProvider implements TwoFactorProviderInterface
+final readonly class TwoFactorProvider implements TwoFactorProviderInterface
 {
 
-    public function __construct(private readonly WebauthnFormRenderer $formRenderer,
-        private readonly WebauthnAuthenticatorInterface $authenticator,
-        private readonly WebAuthnRequestStorage $requestStorage
+    public function __construct(private WebauthnFormRenderer $formRenderer,
+        private WebauthnAuthenticatorInterface $authenticator,
+        private WebAuthnRequestStorage $requestStorage
     )
     {
     }

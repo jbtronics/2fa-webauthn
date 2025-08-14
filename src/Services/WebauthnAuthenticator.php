@@ -15,31 +15,19 @@ use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialSource;
 
-class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
+readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 {
 
-    private U2FAppIDProvider $u2fAppIDProvider;
-    private UserPublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository;
-
-    protected string $requireUserVerification = "discouraged";
-    protected int $timeout;
-    protected ?string $rpID;
-    protected WebauthnProvider $webauthnProvider;
-    protected PSRRequestHelper $PSRRequestHelper;
-
-    protected ?LoggerInterface $logger;
-
-
-    public function __construct(U2FAppIDProvider $u2FAppIDProvider, UserPublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
-        WebauthnProvider $webauthnProvider, PSRRequestHelper $PSRRequestHelper, int $timeout, ?string $rpID, ?LoggerInterface $logger = null)
+    public function __construct(private U2FAppIDProvider $u2FAppIDProvider,
+        private UserPublicKeyCredentialSourceRepository $publicKeyCredentialSourceRepository,
+        private WebauthnProvider $webauthnProvider,
+        private PSRRequestHelper $PSRRequestHelper,
+        private int $timeout,
+        private ?string $rpID,
+        private ?LoggerInterface $logger = null,
+        private string $requireUserVerification = "discouraged"
+    )
     {
-        $this->u2fAppIDProvider = $u2FAppIDProvider;
-        $this->publicKeyCredentialSourceRepository = $publicKeyCredentialSourceRepository;
-        $this->webauthnProvider = $webauthnProvider;
-        $this->PSRRequestHelper = $PSRRequestHelper;
-        $this->timeout = $timeout;
-        $this->rpID = $rpID;
-        $this->logger = $logger;
     }
 
     public function generateAuthenticationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
@@ -61,7 +49,7 @@ class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
         //Add the U2F appID extension for backward compatibility
         $extensions =  [
-            new AuthenticationExtension('appid', $this->u2fAppIDProvider->getAppID())
+            new AuthenticationExtension('appid', $this->u2FAppIDProvider->getAppID())
         ];
 
         //Set options

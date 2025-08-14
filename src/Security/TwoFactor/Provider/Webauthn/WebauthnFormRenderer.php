@@ -14,15 +14,15 @@ use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Twig\Environment;
 
-final class WebauthnFormRenderer implements TwoFactorFormRendererInterface
+final readonly class WebauthnFormRenderer implements TwoFactorFormRendererInterface
 {
     public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
-        private readonly Environment $twig,
-        private readonly WebauthnAuthenticator $authenticator,
-        private readonly string $template,
-        private readonly WebAuthnRequestStorage $requestStorage,
-        private readonly WebauthnProvider $webauthnProvider
+        private TokenStorageInterface $tokenStorage,
+        private Environment $twig,
+        private WebauthnAuthenticator $authenticator,
+        private string $template,
+        private WebAuthnRequestStorage $requestStorage,
+        private WebauthnProvider $webauthnProvider
     )
     {
     }

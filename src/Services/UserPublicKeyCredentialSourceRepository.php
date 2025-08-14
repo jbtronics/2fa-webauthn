@@ -13,13 +13,10 @@ use Webauthn\TrustPath\EmptyTrustPath;
 /**
  * This class provides the public key credential sources, normalize legacy U2F keys and merges U2F and Webauthn keys.
  */
-class UserPublicKeyCredentialSourceRepository
+readonly class UserPublicKeyCredentialSourceRepository
 {
-    private Security $security;
-
-    public function __construct(Security $security)
+    public function __construct(private Security $security)
     {
-        $this->security = $security;
     }
 
 
