@@ -111,8 +111,11 @@ readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 
         //Do the check
         try {
+            //The first parameter was renamed from "publicKeyCredentialSource" to "credentialRecord" in
+            //web-auth/webauthn-lib 5.3 (a PublicKeyCredentialSource is still accepted there, just deprecated).
+            //Pass it positionally so the call works with both the old and the new parameter name.
             $publicKeyCredentialSource = $validator->check(
-                publicKeyCredentialSource: $publicKeyCredentialSource,
+                $publicKeyCredentialSource,
                 authenticatorAssertionResponse:  $authenticatorAssertionResponse,
                 publicKeyCredentialRequestOptions:  $request,
                 host: $host,
