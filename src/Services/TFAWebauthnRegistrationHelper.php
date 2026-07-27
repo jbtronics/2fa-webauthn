@@ -133,11 +133,21 @@ readonly class TFAWebauthnRegistrationHelper
             throw new \RuntimeException('No active registration request found!');
         }
 
-        return $this->webauthnProvider->getAuthenticatorAttestationResponseValidator()->check(
+        $credential = $this->webauthnProvider->getAuthenticatorAttestationResponseValidator()->check(
             authenticatorAttestationResponse:  $authenticatorAttestationResponse,
             publicKeyCredentialCreationOptions:  $activeRegistration,
             host: $serverRequest->getUri()->getHost(),
         );
+
+        //On web-auth/webauthn-lib < 5.3, check() already returns a PublicKeyCredentialSource.
+        if ($credential instanceof PublicKeyCredentialSource) {
+            return $credential;
+        }
+
+        //Since web-auth/webauthn-lib 5.3, check() returns a CredentialRecord instead (PublicKeyCredentialSource is
+        //now deprecated and will be removed in 6.0). Wrap it back using the library-provided bridge, so consuming
+        //applications relying on PublicKeyCredentialSource keep working.
+        return PublicKeyCredentialSource::fromCredentialRecord($credential);
     }
 
 
