@@ -90,8 +90,6 @@ readonly class WebauthnProvider
                 PS384::create(),
                 PS512::create(),
 
-                Ed256::create(),
-                Ed512::create(),
             )
             ;
     }
