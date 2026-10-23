@@ -8,7 +8,7 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 * Backward compatibility for existing registered U2F keys (from [r/u2f-two-factor-bundle](https://github.com/darookee/u2f-two-factor-bundle))
 
 ## Requirements
-* Symfony 7
+* Symfony 6.4, 7 or 8
 * PHP 8.2 or later
 * webauthn/webauthn-lib 5.0 or later
 
