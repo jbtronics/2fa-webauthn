@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Jbtronics\TFAWebauthn\Security\TwoFactor\Provider\Webauthn;
 
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
-use Jbtronics\TFAWebauthn\Services\WebauthnAuthenticator;
 use Jbtronics\TFAWebauthn\Services\WebauthnProvider;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,19 +20,20 @@ final readonly class WebauthnFormRenderer implements TwoFactorFormRendererInterf
     public function __construct(
         private TokenStorageInterface $tokenStorage,
         private Environment $twig,
-        private WebauthnAuthenticator $authenticator,
+        private WebauthnAuthenticatorInterface $authenticator,
         private string $template,
         private WebAuthnRequestStorage $requestStorage,
-        private WebauthnProvider $webauthnProvider
-    )
-    {
+        private WebauthnProvider $webauthnProvider,
+    ) {
     }
 
+    /**
+     * @param array<string, mixed> $templateVars
+     */
     public function renderForm(Request $request, array $templateVars): Response
     {
         $token = $this->tokenStorage->getToken();
-
-        if ($token === null) {
+        if (null === $token) {
             throw new \RuntimeException('Token cannot be null! You have to be already logged in to use this form.');
         }
 
@@ -43,15 +45,11 @@ final readonly class WebauthnFormRenderer implements TwoFactorFormRendererInterf
         $requestData = $this->authenticator->generateAuthenticationRequest($user);
         $this->requestStorage->setActiveAuthRequest($requestData);
 
-        $serializer = $this->webauthnProvider->getWebauthnSerializer();
-
-        $templateVars['webauthn_request_data'] = $serializer->serialize($requestData, 'json', [
-            AbstractObjectNormalizer::SKIP_NULL_VALUES => true, // Highly recommended!
-            JsonEncode::OPTIONS => JSON_THROW_ON_ERROR, // Optional
+        $templateVars['webauthn_request_data'] = $this->webauthnProvider->getWebauthnSerializer()->serialize($requestData, 'json', [
+            AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+            JsonEncode::OPTIONS => \JSON_THROW_ON_ERROR,
         ]);
 
-        $content = $this->twig->render($this->template, $templateVars);
-
-        return new Response($content);
+        return new Response($this->twig->render($this->template, $templateVars));
     }
 }
