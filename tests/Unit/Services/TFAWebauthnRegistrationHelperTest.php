@@ -80,6 +80,7 @@ final class TFAWebauthnRegistrationHelperTest extends TestCase
     public static function provideInvalidResponses(): iterable
     {
         yield 'not JSON' => ['not json'];
+        yield 'JSON object without credential shape' => ['{"foo":"bar"}'];
     }
 
     #[DataProvider('provideInvalidResponses')]

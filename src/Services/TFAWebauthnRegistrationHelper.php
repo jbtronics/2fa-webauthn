@@ -10,6 +10,7 @@ use Jbtronics\TFAWebauthn\Services\Helpers\PSRRequestHelper;
 use Jbtronics\TFAWebauthn\Services\Helpers\WebAuthnRequestStorage;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorSelectionCriteria;
@@ -120,7 +121,17 @@ readonly class TFAWebauthnRegistrationHelper
     public function checkRegistrationResponse(string $jsonResponse): PublicKeyCredentialSource
     {
         $serializer = $this->webauthnProvider->getWebauthnSerializer();
-        $publicKeyCredential = $serializer->deserialize($jsonResponse, PublicKeyCredential::class, 'json');
+        try {
+            $publicKeyCredential = $serializer->deserialize($jsonResponse, PublicKeyCredential::class, 'json');
+        } catch (SerializerExceptionInterface $exception) {
+            throw new \RuntimeException('The given response is not valid JSON encoded webauthn credential!', 0, $exception);
+        }
+
+        // The serializer falls back to returning the decoded array if the data does not look like a credential
+        if (!$publicKeyCredential instanceof PublicKeyCredential) {
+            throw new \RuntimeException('The given response is not a webauthn credential!');
+        }
+
         $authenticatorAttestationResponse = $publicKeyCredential->response;
 
         if (!$authenticatorAttestationResponse instanceof AuthenticatorAttestationResponse) {
