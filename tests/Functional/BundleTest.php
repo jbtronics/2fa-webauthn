@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Twig\Environment;
 
 final class BundleTest extends KernelTestCase
 {
@@ -73,6 +74,48 @@ final class BundleTest extends KernelTestCase
 
         self::assertArrayHasKey('webauthn_two_factor_provider', $providers);
         self::assertInstanceOf(TwoFactorProvider::class, $providers['webauthn_two_factor_provider']);
+    }
+
+    public function testBundleRegistersItsTwigNamespace(): void
+    {
+        self::assertTrue(self::service('twig', Environment::class)->getLoader()->exists('@TFAWebauthn/Authentication/form.html.twig'));
+    }
+
+    public function testRenderFormWithDefaultTemplate(): void
+    {
+        $user = new TestUser([Factory::credentialSource('key-1')]);
+        $request = $this->pushRequest($user);
+        $provider = $this->twoFactorProvider();
+
+        $response = $provider->getFormRenderer()->renderForm($request, [
+            'authenticationError' => null,
+            'authenticationErrorData' => [],
+            'availableTwoFactorProviders' => ['webauthn_two_factor_provider'],
+            'twoFactorProvider' => 'webauthn_two_factor_provider',
+            'checkPathUrl' => null,
+            'checkPathRoute' => '2fa_login_check',
+            'authCodeParameterName' => '_auth_code',
+            'displayTrustedOption' => false,
+            'trustedParameterName' => '_trusted',
+            'isCsrfProtectionEnabled' => false,
+            'logoutPath' => '/logout',
+        ]);
+
+        $content = (string) $response->getContent();
+        self::assertStringContainsString('data-webauthn-tfa-action="authenticate"', $content);
+        self::assertStringContainsString('action="/2fa_check"', $content);
+        self::assertSame(1, preg_match("/data-webauthn-tfa-data='([^']+)'/", $content, $matches));
+
+        $data = json_decode($matches[1], true, flags: \JSON_THROW_ON_ERROR);
+        self::assertIsArray($data);
+        self::assertSame('localhost', $data['rpId']);
+        self::assertSame('https://localhost', $data['extensions']['appid']);
+        self::assertCount(1, $data['allowCredentials']);
+
+        // The request survives the session round trip, so the response can be validated later
+        $stored = self::service('jbtronics_webauthn_tfa.webauthn_request_storage', WebAuthnRequestStorage::class)->getActiveAuthRequest();
+        self::assertNotNull($stored);
+        self::assertSame(rtrim(strtr(base64_encode($stored->challenge), '+/', '-_'), '='), $data['challenge']);
     }
 
     /**
