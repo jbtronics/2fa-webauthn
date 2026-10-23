@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * This services provides the AppID for U2F extension, which is needed for backwards compatibility with old versions.
  */
-readonly class U2FAppIDProvider
+final readonly class U2FAppIDProvider
 {
     public function __construct(private RequestStack $requestStack, private ?string $appIDoverride = null)
     {

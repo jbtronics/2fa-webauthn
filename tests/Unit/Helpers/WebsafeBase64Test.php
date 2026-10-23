@@ -29,8 +29,10 @@ final class WebsafeBase64Test extends TestCase
         self::assertSame($expected, WebsafeBase64::decodeToBinary($input));
     }
 
-    public function testInvalidCharactersAreIgnored(): void
+    public function testInvalidInputThrows(): void
     {
-        self::assertSame(WebsafeBase64::decodeToBinary('YWJj'), WebsafeBase64::decodeToBinary('YW!Jj'));
+        $this->expectException(\InvalidArgumentException::class);
+
+        WebsafeBase64::decodeToBinary('not base64!');
     }
 }
