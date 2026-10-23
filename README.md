@@ -8,12 +8,16 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 * Backward compatibility for existing registered U2F keys (from [r/u2f-two-factor-bundle](https://github.com/darookee/u2f-two-factor-bundle))
 
 ## Requirements
-* Symfony 7
 * PHP 8.2 or later
-* webauthn/webauthn-lib 5.0 or later
+* Symfony 7.4 or 8.x
+* scheb/2fa-bundle 7.x or 8.x (scheb/2fa-bundle 8 requires PHP 8.4)
+* web-auth/webauthn-lib 5.3.7 or later
 
+If you want to use Symfony 6.4 or scheb/2fa-bundle 6, use the version 3.x of this bundle.
 If you want to use symfony 5.* and PHP 7.4, use the version 1.0.0 of this bundle.
 If you want to use PHP 8.1 and webauthn/webauthn-lib 4.*, use the version 2.0.0 of this bundle.
+
+Upgrading from 3.x? See [UPGRADE.md](UPGRADE.md).
 
 ## Installation
 1. Install the bundle `composer require jbtronics/2fa-webauthn`
@@ -29,7 +33,7 @@ use Jbtronics\TFAWebauthn\Model\TwoFactorInterface as WebauthnTwoFactorInterface
 class User implements WebauthnTwoFactorInterface
 {
     /** 
-     * @var Collection<int, PublicKeyCredentialSource>
+     * @var Collection<int, WebAuthnKey>
      * @ORM\OneToMany(targetEntity="App\Entity\WebauthnKey", mappedBy="user", cascade={"REMOVE"}, orphanRemoval=true)
      */
     private $webauthnKeys;
@@ -57,7 +61,7 @@ class User implements WebauthnTwoFactorInterface
 
     /**
      * Returns a list of all webauthn keys, associated with this user
-     * @return iterable<PublicKeyCredentialSource>
+     * @return iterable<CredentialRecord>
      */
     public function getWebauthnKeys(): iterable
     {
@@ -89,11 +93,11 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-use Webauthn\PublicKeyCredentialSource as BasePublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'webauthn_keys')]
-class WebAuthnKey extends BasePublicKeyCredentialSource
+class WebAuthnKey extends CredentialRecord
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
@@ -112,7 +116,7 @@ class WebAuthnKey extends BasePublicKeyCredentialSource
         return $this->id;
     }
     
-    public static function fromRegistration(BasePublicKeyCredentialSource $registration): self
+    public static function fromRegistration(CredentialRecord $registration): self
     {
         return new self(
             publicKeyCredentialId:  $registration->publicKeyCredentialId,
@@ -151,12 +155,11 @@ tfa_webauthn:
   # U2FAppID: null # The U2F AppID of your application. If null, the current host will be used. Default: null
   
   # These settings are most likely not important for two-factor authentication:
-  # rpName: 'My Application' # The relying party name of your application, Default: 'My Application'
-  # rpIcon: null # The relying party icon of your application. Default: null
+  # rpName: 'Webauthn Application' # The relying party name, only used when rpID is not set (browsers show the rpID otherwise). Default: 'Webauthn Application'
 ```
 
 5. Customize the login template: Similar to the base login template of the `scheb/2fa` bundle you will most likely need to override the login template of this bundle to integrate it into your design.
-Copy the template from `Resources/views/Authentication/form.html.twig` to your project and customize it to your needs. Configure the `template` setting in the bundle config to your new path. 
+Copy the template from `templates/Authentication/form.html.twig` to your project and customize it to your needs. Configure the `template` setting in the bundle config to your new path. 
 
 ## Registration of new keys
 In principle the login with exsting keys should work now, but you will most likely need some possibility to register new keys. To make this easy there is the `Jbtronics\TFAWebauthn\Services\TFAWebauthnRegistrationHelper` service to help you with this:
@@ -239,6 +242,18 @@ If the form is submitted, the frontend code will catch that and start a registra
 4. Remove the old routes, templates and settings of the `r/u2f-two-factor-bundle` and remove it from your application
 5. Follow the setup steps above
 
+
+## Development
+```bash
+composer install
+composer test      # PHPUnit
+composer phpstan   # PHPStan
+composer cs-check  # PHP-CS-Fixer (composer cs-fix to apply)
+```
+
+Vulnerable dependencies are blocked by Composer itself (its security `policy`, enabled by default since Composer 2.9), and CI runs `composer audit`, so `roave/security-advisories` is not needed.
+
+CI runs on GitHub Actions with the [Laminas CI matrix](https://github.com/laminas/laminas-ci-matrix-action): PHPUnit on every supported PHP version with lowest and latest dependencies (PHP 8.2/8.3 resolve Symfony 7.4 and scheb 7, PHP 8.4/8.5 resolve Symfony 8 and scheb 8), plus an extra job for Symfony 7.4 with scheb 8 on the newest PHP. See `.laminas-ci.json`.
 
 ## License
 This bundle is licensed under the MIT license. See [LICENSE](LICENSE) for details.

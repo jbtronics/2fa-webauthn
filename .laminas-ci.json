@@ -1,0 +1,26 @@
+{
+    "stablePHP": "8.4",
+    "additional_checks": [
+        {
+            "name": "PHPUnit on Symfony 7.4 with scheb/2fa-bundle 8",
+            "job": {
+                "php": "8.5",
+                "dependencies": "latest",
+                "command": "export COMPOSER_HOME=/tmp/composer-home && composer update --no-interaction --no-progress --with-all-dependencies --with 'symfony/framework-bundle:7.4.*' --with 'symfony/security-bundle:7.4.*' --with 'symfony/twig-bundle:7.4.*' --with 'symfony/http-kernel:7.4.*' --with 'symfony/serializer:7.4.*' --with 'scheb/2fa-bundle:^8.0' && composer show symfony/framework-bundle && composer show scheb/2fa-bundle && vendor/bin/phpunit"
+            }
+        },
+        {
+            "name": "Composer audit",
+            "job": {
+                "php": "8.5",
+                "dependencies": "latest",
+                "command": "export COMPOSER_HOME=/tmp/composer-home && composer audit"
+            }
+        }
+    ],
+    "exclude": [
+        {
+            "name": "README Linting"
+        }
+    ]
+}

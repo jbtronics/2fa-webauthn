@@ -1,0 +1,15 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - config
+        - src
+        - tests
+    tmpDir: .phpstan.cache
+    # The Symfony serializer is documented to return an instance of the requested class, but returns the decoded
+    # array for JSON that does not look like it, so these instanceof checks are needed.
+    treatPhpDocTypesAsCertain: false

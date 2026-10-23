@@ -1,95 +1,105 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Jbtronics\TFAWebauthn\Services\Helpers;
 
 use Jbtronics\TFAWebauthn\Services\WebauthnProvider;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialOptions;
 use Webauthn\PublicKeyCredentialRequestOptions;
 
 /**
  * This service stores the authentication and registration requests in the session so that they can be retrieved later,
- * for validation
+ * for validation.
  */
-class WebAuthnRequestStorage
+final readonly class WebAuthnRequestStorage
 {
     private const AUTH_KEY = 'jbtronics_webauthn_tfa.auth_request';
     private const REG_KEY = 'jbtronics_webauthn_tfa.reg_request';
 
-
-    public function __construct(private readonly RequestStack $requestStack, private readonly WebauthnProvider $webauthnProvider)
+    public function __construct(private RequestStack $requestStack, private WebauthnProvider $webauthnProvider)
     {
     }
 
     /**
-     * This method stores the active PublicKeyCredentialRequestOptions in the session
-     * @param  PublicKeyCredentialRequestOptions|null  $authRequest
-     * @return void
+     * Stores the active PublicKeyCredentialRequestOptions in the session, or clears it if null is given.
      */
     public function setActiveAuthRequest(?PublicKeyCredentialRequestOptions $authRequest): void
     {
-        $serializer = $this->webauthnProvider->getWebauthnSerializer();
-
-        $session = $this->requestStack->getSession();
-        $session->set(self::AUTH_KEY, $serializer->serialize($authRequest, 'json', [
-            'skip_null_values' => true, // Highly recommended!
-            'json_encode_options' => JSON_THROW_ON_ERROR
-        ]));
+        $this->store(self::AUTH_KEY, $authRequest);
     }
 
     /**
-     * This method returns the active PublicKeyCredentialRequestOptions from the session, or null if
-     * @return PublicKeyCredentialRequestOptions|null
+     * Returns the active PublicKeyCredentialRequestOptions from the session, or null if none was saved before.
      */
     public function getActiveAuthRequest(): ?PublicKeyCredentialRequestOptions
     {
-        $session = $this->requestStack->getSession();
-
-        $stored = $session->get(self::AUTH_KEY);
-        if ($stored === null) {
-            return null;
-        }
-
-        // Deserialize the stored JSON string into a PublicKeyCredentialRequestOptions object
-        return $this->webauthnProvider->getWebauthnSerializer()->deserialize($stored, PublicKeyCredentialRequestOptions::class, 'json', [
-            'json_decode_options' => JSON_THROW_ON_ERROR
-        ]);
+        return $this->load(self::AUTH_KEY, PublicKeyCredentialRequestOptions::class);
     }
 
     /**
-     * Save the active PublicKeyCredentialCreationOptions in the session
-     * @param  PublicKeyCredentialCreationOptions|null  $registrationRequest
-     * @return void
-     * @throws \JsonException
+     * Stores the active PublicKeyCredentialCreationOptions in the session, or clears it if null is given.
      */
     public function setActiveRegistrationRequest(?PublicKeyCredentialCreationOptions $registrationRequest): void
     {
-        $serializer = $this->webauthnProvider->getWebauthnSerializer();
+        $this->store(self::REG_KEY, $registrationRequest);
+    }
+
+    /**
+     * Returns the active PublicKeyCredentialCreationOptions from the session, or null if none was saved before.
+     */
+    public function getActiveRegistrationRequest(): ?PublicKeyCredentialCreationOptions
+    {
+        return $this->load(self::REG_KEY, PublicKeyCredentialCreationOptions::class);
+    }
+
+    private function store(string $key, ?PublicKeyCredentialOptions $options): void
+    {
         $session = $this->requestStack->getSession();
 
-        $session->set(self::REG_KEY, $serializer->serialize($registrationRequest, 'json', [
-            'skip_null_values' => true, // Highly recommended!
-            'json_encode_options' => JSON_THROW_ON_ERROR
+        if (null === $options) {
+            $session->remove($key);
+
+            return;
+        }
+
+        $session->set($key, $this->webauthnProvider->getWebauthnSerializer()->serialize($options, 'json', [
+            AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+            JsonEncode::OPTIONS => \JSON_THROW_ON_ERROR,
         ]));
     }
 
     /**
-     * Retrieve the active PublicKeyCredentialCreationOptions from the session, or null if now was saved before
-     * @return PublicKeyCredentialCreationOptions|null
+     * @template T of PublicKeyCredentialOptions
+     *
+     * @param class-string<T> $class
+     *
+     * @return T|null
      */
-    public function getActiveRegistrationRequest(): ?PublicKeyCredentialCreationOptions
+    private function load(string $key, string $class): ?PublicKeyCredentialOptions
     {
-        $session = $this->requestStack->getSession();
-
-        $stored = $session->get(self::REG_KEY);
-        if ($stored === null) {
+        $stored = $this->requestStack->getSession()->get($key);
+        if (!\is_string($stored)) {
             return null;
         }
 
-        return $this->webauthnProvider->getWebauthnSerializer()->deserialize($stored, PublicKeyCredentialCreationOptions::class, 'json', [
-            'json_decode_options' => JSON_THROW_ON_ERROR
+        // The library serializes an empty RP name as the RP ID, but denormalizing a non-empty name triggers its own
+        // deprecation (web-auth/webauthn-lib 5.3). Blank it again, it is only used for display.
+        $data = json_decode($stored, true, flags: \JSON_THROW_ON_ERROR);
+        if (\is_array($data) && \is_array($data['rp'] ?? null) && isset($data['rp']['id']) && ($data['rp']['name'] ?? null) === $data['rp']['id']) {
+            $data['rp']['name'] = '';
+            $stored = json_encode($data, \JSON_THROW_ON_ERROR);
+        }
+
+        $options = $this->webauthnProvider->getWebauthnSerializer()->deserialize($stored, $class, 'json', [
+            JsonDecode::OPTIONS => \JSON_THROW_ON_ERROR,
         ]);
+
+        return $options instanceof $class ? $options : null;
     }
-
-
 }
