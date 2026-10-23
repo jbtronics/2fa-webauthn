@@ -55,6 +55,8 @@ final class WebAuthnRequestStorageTest extends TestCase
         self::assertNotNull($restored);
         self::assertSame($options->challenge, $restored->challenge);
         self::assertSame('alice-id', $restored->user->id);
+        self::assertSame('localhost', $restored->rp->id);
+        self::assertSame('', $restored->rp->name, 'the RP name serialized as the RP ID is blanked again');
         self::assertNull($storage->getActiveAuthRequest());
     }
 

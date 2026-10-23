@@ -17,12 +17,12 @@ use Webauthn\PublicKeyCredentialRequestOptions;
  * This service stores the authentication and registration requests in the session so that they can be retrieved later,
  * for validation.
  */
-class WebAuthnRequestStorage
+final readonly class WebAuthnRequestStorage
 {
     private const AUTH_KEY = 'jbtronics_webauthn_tfa.auth_request';
     private const REG_KEY = 'jbtronics_webauthn_tfa.reg_request';
 
-    public function __construct(private readonly RequestStack $requestStack, private readonly WebauthnProvider $webauthnProvider)
+    public function __construct(private RequestStack $requestStack, private WebauthnProvider $webauthnProvider)
     {
     }
 
@@ -86,6 +86,14 @@ class WebAuthnRequestStorage
         $stored = $this->requestStack->getSession()->get($key);
         if (!\is_string($stored)) {
             return null;
+        }
+
+        // The library serializes an empty RP name as the RP ID, but denormalizing a non-empty name triggers its own
+        // deprecation (web-auth/webauthn-lib 5.3). Blank it again, it is only used for display.
+        $data = json_decode($stored, true, flags: \JSON_THROW_ON_ERROR);
+        if (\is_array($data) && \is_array($data['rp'] ?? null) && isset($data['rp']['id']) && ($data['rp']['name'] ?? null) === $data['rp']['id']) {
+            $data['rp']['name'] = '';
+            $stored = json_encode($data, \JSON_THROW_ON_ERROR);
         }
 
         $options = $this->webauthnProvider->getWebauthnSerializer()->deserialize($stored, $class, 'json', [

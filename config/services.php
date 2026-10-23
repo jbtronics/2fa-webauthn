@@ -84,7 +84,6 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             '$rpID' => param('jbtronics_webauthn_tfa.rpID'),
             '$rpName' => param('jbtronics_webauthn_tfa.rpName'),
-            '$rpIcon' => param('jbtronics_webauthn_tfa.rpIcon'),
         ]);
 
     $services

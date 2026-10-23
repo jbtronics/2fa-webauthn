@@ -4,6 +4,7 @@
          bootstrap="vendor/autoload.php"
          cacheDirectory=".phpunit.cache"
          colors="true"
+         failOnDeprecation="true"
          failOnNotice="true"
          failOnWarning="true"
          failOnRisky="true"
@@ -18,7 +19,7 @@
         </testsuite>
     </testsuites>
 
-    <source ignoreSuppressionOfDeprecations="true">
+    <source ignoreIndirectDeprecations="true" ignoreSuppressionOfDeprecations="true">
         <include>
             <directory>src</directory>
         </include>
