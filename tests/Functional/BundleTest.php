@@ -125,6 +125,7 @@ final class BundleTest extends KernelTestCase
     {
         yield 'empty' => [''];
         yield 'not JSON' => ['not json'];
+        yield 'JSON without credential shape' => ['{"foo":"bar"}'];
         yield 'unknown credential' => ['{"id":"AAAA","rawId":"AAAA","type":"public-key","response":{"clientDataJSON":"eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQUFBQSIsIm9yaWdpbiI6Imh0dHBzOi8vbG9jYWxob3N0In0","authenticatorData":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","signature":"AAAA"}}'];
     }
 

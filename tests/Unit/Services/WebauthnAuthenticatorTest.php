@@ -44,6 +44,9 @@ final class WebauthnAuthenticatorTest extends TestCase
     public static function provideInvalidResponses(): iterable
     {
         yield 'not JSON' => ['not json', 'Unable to load JSON data'];
+        // The serializer returns a plain array for JSON that does not look like a credential (used to crash)
+        yield 'JSON object without credential shape' => ['{"foo":"bar"}', 'not a webauthn credential'];
+        yield 'JSON list' => ['[1,2,3]', 'not a webauthn credential'];
         yield 'unknown credential' => [
             '{"id":"AAAA","rawId":"AAAA","type":"public-key","response":{"clientDataJSON":"eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQUFBQSIsIm9yaWdpbiI6Imh0dHBzOi8vbG9jYWxob3N0In0","authenticatorData":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","signature":"AAAA"}}',
             'No credential source found',
@@ -75,6 +78,6 @@ final class WebauthnAuthenticatorTest extends TestCase
         $user = new TestUser();
         $authenticator = Factory::authenticator($user);
 
-        self::assertFalse($authenticator->checkAuthenticationResponse($user, $authenticator->generateAuthenticationRequest($user), 'not json'));
+        self::assertFalse($authenticator->checkAuthenticationResponse($user, $authenticator->generateAuthenticationRequest($user), '{"foo":"bar"}'));
     }
 }
