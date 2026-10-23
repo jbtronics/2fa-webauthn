@@ -8,7 +8,7 @@ This repository contains a plugin for [scheb/2fa](https://github.com/scheb/2fa) 
 * Backward compatibility for existing registered U2F keys (from [r/u2f-two-factor-bundle](https://github.com/darookee/u2f-two-factor-bundle))
 
 ## Requirements
-* Symfony 7
+* Symfony 6.4, 7 or 8
 * PHP 8.2 or later
 * webauthn/webauthn-lib 5.0 or later
 
@@ -156,7 +156,7 @@ tfa_webauthn:
 ```
 
 5. Customize the login template: Similar to the base login template of the `scheb/2fa` bundle you will most likely need to override the login template of this bundle to integrate it into your design.
-Copy the template from `Resources/views/Authentication/form.html.twig` to your project and customize it to your needs. Configure the `template` setting in the bundle config to your new path. 
+Copy the template from `templates/Authentication/form.html.twig` to your project and customize it to your needs. Configure the `template` setting in the bundle config to your new path. 
 
 ## Registration of new keys
 In principle the login with exsting keys should work now, but you will most likely need some possibility to register new keys. To make this easy there is the `Jbtronics\TFAWebauthn\Services\TFAWebauthnRegistrationHelper` service to help you with this:
@@ -239,6 +239,19 @@ If the form is submitted, the frontend code will catch that and start a registra
 4. Remove the old routes, templates and settings of the `r/u2f-two-factor-bundle` and remove it from your application
 5. Follow the setup steps above
 
+
+## Development
+
+```bash
+composer install
+composer test      # PHPUnit
+composer phpstan   # PHPStan
+composer cs-check  # PHP-CS-Fixer (composer cs-fix to apply)
+```
+
+CI runs on GitHub Actions with the [Laminas CI matrix](https://github.com/laminas/laminas-ci-matrix-action): PHPUnit on every supported PHP version with lowest and latest dependencies, plus extra jobs for Symfony 6.4 with scheb/2fa-bundle 6 and Symfony 7.4 with scheb/2fa-bundle 8, PHPStan, PHP-CS-Fixer and `composer audit`. See `.laminas-ci.json`.
+
+Vulnerable dependencies are blocked by Composer itself (its security `policy`, enabled by default since Composer 2.9), so `roave/security-advisories` is not needed.
 
 ## License
 This bundle is licensed under the MIT license. See [LICENSE](LICENSE) for details.
