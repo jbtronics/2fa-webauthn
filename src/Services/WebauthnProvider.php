@@ -29,7 +29,7 @@ use Webauthn\PublicKeyCredentialRpEntity;
 /**
  * This service provides some common services of the web-authn library which are configured by the global configuration.
  */
-readonly class WebauthnProvider
+final readonly class WebauthnProvider
 {
     private SerializerInterface $serializer;
 
@@ -37,14 +37,11 @@ readonly class WebauthnProvider
     private AuthenticatorAttestationResponseValidator $attestationResponseValidator;
     private PublicKeyCredentialRpEntity $rpEntity;
 
-    public function __construct(?string $rpID, string $rpName, ?string $rpIcon)
+    public function __construct(?string $rpID, string $rpName = '')
     {
-        // Create the RP entity
-        $this->rpEntity = new PublicKeyCredentialRpEntity(
-            $rpName,
-            $rpID,
-            $rpIcon
-        );
+        // The RP name is deprecated since web-auth/webauthn-lib 5.3 (removed in 6.0): the serialized rp.name falls back
+        // to the RP ID. It is only kept when no RP ID is configured, as browsers require a name.
+        $this->rpEntity = PublicKeyCredentialRpEntity::create(null === $rpID ? $rpName : '', $rpID);
 
         // Create the serializer
         $attestationSupportStatementManager = new AttestationStatementSupportManager();

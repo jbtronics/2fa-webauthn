@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Jbtronics\TFAWebauthn\Model;
 
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 /**
@@ -29,8 +29,9 @@ interface TwoFactorInterface
 
     /**
      * Returns a list of all webauthn keys, associated with this user.
+     * Entities extending the deprecated PublicKeyCredentialSource are CredentialRecord instances too.
      *
-     * @return iterable<PublicKeyCredentialSource>
+     * @return iterable<CredentialRecord>
      */
     public function getWebauthnKeys(): iterable;
 

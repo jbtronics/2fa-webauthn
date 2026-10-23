@@ -14,13 +14,13 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExcep
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialParameters;
-use Webauthn\PublicKeyCredentialSource;
 
-readonly class TFAWebauthnRegistrationHelper
+final readonly class TFAWebauthnRegistrationHelper
 {
     /**
      * @param positive-int $timeout
@@ -70,7 +70,7 @@ readonly class TFAWebauthnRegistrationHelper
 
         // Exclude all existing credentials
         $excludedCredentials = array_map(
-            static fn (PublicKeyCredentialSource $credential): PublicKeyCredentialDescriptor => $credential->getPublicKeyCredentialDescriptor(),
+            static fn (CredentialRecord $credential): PublicKeyCredentialDescriptor => $credential->getPublicKeyCredentialDescriptor(),
             $this->keyCredentialSourceRepository->findAllForUserEntity($user->getWebAuthnUser())
         );
 
@@ -114,9 +114,9 @@ readonly class TFAWebauthnRegistrationHelper
      *
      * @param string $jsonResponse The json encoded response from the browser
      *
-     * @return PublicKeyCredentialSource The credential returned from the browser
+     * @return CredentialRecord The credential returned from the browser
      */
-    public function checkRegistrationResponse(string $jsonResponse): PublicKeyCredentialSource
+    public function checkRegistrationResponse(string $jsonResponse): CredentialRecord
     {
         $serializer = $this->webauthnProvider->getWebauthnSerializer();
         try {
@@ -146,20 +146,10 @@ readonly class TFAWebauthnRegistrationHelper
             throw new \RuntimeException('No active registration request found!');
         }
 
-        $credential = $this->webauthnProvider->getAuthenticatorAttestationResponseValidator()->check(
+        return $this->webauthnProvider->getAuthenticatorAttestationResponseValidator()->check(
             authenticatorAttestationResponse: $authenticatorAttestationResponse,
             publicKeyCredentialCreationOptions: $activeRegistration,
             host: $serverRequest->getUri()->getHost(),
         );
-
-        // On web-auth/webauthn-lib < 5.3, check() already returns a PublicKeyCredentialSource.
-        if ($credential instanceof PublicKeyCredentialSource) {
-            return $credential;
-        }
-
-        // Since web-auth/webauthn-lib 5.3, check() returns a CredentialRecord instead (PublicKeyCredentialSource is
-        // now deprecated and will be removed in 6.0). Wrap it back using the library-provided bridge, so consuming
-        // applications relying on PublicKeyCredentialSource keep working.
-        return PublicKeyCredentialSource::fromCredentialRecord($credential);
     }
 }

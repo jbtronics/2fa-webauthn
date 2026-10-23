@@ -59,8 +59,9 @@ final class TestKernel extends Kernel implements CompilerPassInterface
             'test' => true,
             'http_method_override' => false,
             'session' => ['storage_factory_id' => 'session.storage.factory.mock_file'],
-            // The template uses the trans filter; also avoids a broken serializer wiring on Symfony 6.4.0
+            // The template uses the trans filter
             'translator' => ['enabled' => true, 'fallbacks' => ['en']],
+            'property_info' => ['with_constructor_extractor' => true],
         ]);
         $container->extension('security', [
             'providers' => ['memory' => ['memory' => ['users' => ['alice' => ['password' => 'x']]]]],

@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
-class TFAWebauthnExtension extends Extension
+final class TFAWebauthnExtension extends Extension
 {
     /**
      * @param array<array<string, mixed>> $configs
@@ -27,6 +27,5 @@ class TFAWebauthnExtension extends Extension
 
         $container->setParameter('jbtronics_webauthn_tfa.rpID', $config['rpID']);
         $container->setParameter('jbtronics_webauthn_tfa.rpName', $config['rpName']);
-        $container->setParameter('jbtronics_webauthn_tfa.rpIcon', $config['rpIcon']);
     }
 }

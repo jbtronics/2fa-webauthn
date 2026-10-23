@@ -149,7 +149,7 @@ final class BundleTest extends KernelTestCase
 
         self::assertIsArray($data);
         self::assertSame('localhost', $data['rp']['id']);
-        self::assertSame('Functional', $data['rp']['name']);
+        self::assertSame('localhost', $data['rp']['name'], 'the RP ID is used as name when it is configured');
         self::assertSame('alice', $data['user']['name']);
         self::assertNotNull(self::service('jbtronics_webauthn_tfa.webauthn_request_storage', WebAuthnRequestStorage::class)->getActiveRegistrationRequest());
     }
