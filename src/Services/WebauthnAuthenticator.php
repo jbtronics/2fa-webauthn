@@ -76,6 +76,13 @@ readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
             return false;
         }
 
+        // The serializer falls back to returning the decoded array if the data does not look like a credential
+        if (!$publicKeyCredential instanceof PublicKeyCredential) {
+            $this->logger->error('Webauthn authentication failed: The given response is not a webauthn credential!');
+
+            return false;
+        }
+
         // Find the credential source for the given credential id
         $publicKeyCredentialSource = $this->publicKeyCredentialSourceRepository->findOneByCredentialId($publicKeyCredential->rawId);
         if (null === $publicKeyCredentialSource) {
