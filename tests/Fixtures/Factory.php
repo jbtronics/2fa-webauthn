@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 use Webauthn\TrustPath\EmptyTrustPath;
 
 /**
@@ -42,7 +42,7 @@ final class Factory
 
     public static function webauthnProvider(): WebauthnProvider
     {
-        return new WebauthnProvider('localhost', 'Test', null);
+        return new WebauthnProvider('localhost', 'Test');
     }
 
     public static function requestStorage(?RequestStack $requestStack = null): WebAuthnRequestStorage
@@ -78,8 +78,8 @@ final class Factory
         );
     }
 
-    public static function credentialSource(string $credentialId): PublicKeyCredentialSource
+    public static function credentialSource(string $credentialId): CredentialRecord
     {
-        return new PublicKeyCredentialSource($credentialId, 'public-key', [], 'none', new EmptyTrustPath(), Uuid::v4(), 'public-key-data', 'alice-id', 0);
+        return new CredentialRecord($credentialId, 'public-key', [], 'none', new EmptyTrustPath(), Uuid::v4(), 'public-key-data', 'alice-id', 0);
     }
 }

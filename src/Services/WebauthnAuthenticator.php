@@ -13,12 +13,12 @@ use Psr\Log\NullLogger;
 use Symfony\Component\Serializer\Exception\ExceptionInterface as SerializerExceptionInterface;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
 use Webauthn\AuthenticatorAssertionResponse;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
-use Webauthn\PublicKeyCredentialSource;
 
-readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
+final readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
 {
     private LoggerInterface $logger;
 
@@ -38,15 +38,11 @@ readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         $this->logger = $logger ?? new NullLogger();
     }
 
-    public function generateAuthenticationRequest(?TwoFactorInterface $user = null): PublicKeyCredentialRequestOptions
+    public function generateAuthenticationRequest(TwoFactorInterface $user): PublicKeyCredentialRequestOptions
     {
-        if (null === $user) {
-            throw new \LogicException('You have to pass a user to this method!');
-        }
-
         // Retrieve the registered keys for the user
         $allowedCredentials = array_map(
-            static fn (PublicKeyCredentialSource $credential): PublicKeyCredentialDescriptor => $credential->getPublicKeyCredentialDescriptor(),
+            static fn (CredentialRecord $credential): PublicKeyCredentialDescriptor => $credential->getPublicKeyCredentialDescriptor(),
             $this->publicKeyCredentialSourceRepository->findAllForUserEntity($user->getWebAuthnUser())
         );
 
@@ -105,11 +101,11 @@ readonly class WebauthnAuthenticator implements WebauthnAuthenticatorInterface
         }
 
         try {
-            // The first parameter was renamed from "publicKeyCredentialSource" to "credentialRecord" in
-            // web-auth/webauthn-lib 5.3 (a PublicKeyCredentialSource is still accepted there, just deprecated).
-            // Pass it positionally so the call works with both the old and the new parameter name.
+            // The record is passed as is (not copied), so the counter update done by check() reaches the
+            // application's entity. Passing an entity extending the deprecated PublicKeyCredentialSource triggers a
+            // deprecation in web-auth/webauthn-lib 5.3: such entities should extend CredentialRecord instead.
             $this->webauthnProvider->getAuthenticatorAssertionResponseValidator()->check(
-                $publicKeyCredentialSource,
+                credentialRecord: $publicKeyCredentialSource,
                 authenticatorAssertionResponse: $authenticatorAssertionResponse,
                 publicKeyCredentialRequestOptions: $request,
                 host: $psrRequest->getUri()->getHost(),

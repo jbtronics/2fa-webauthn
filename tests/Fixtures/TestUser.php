@@ -7,14 +7,14 @@ namespace Jbtronics\TFAWebauthn\Tests\Fixtures;
 use Jbtronics\TFAWebauthn\Model\LegacyU2FKeyInterface;
 use Jbtronics\TFAWebauthn\Model\TwoFactorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Webauthn\PublicKeyCredentialSource;
+use Webauthn\CredentialRecord;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 final class TestUser implements UserInterface, TwoFactorInterface
 {
     /**
-     * @param list<PublicKeyCredentialSource> $webauthnKeys
-     * @param list<LegacyU2FKeyInterface>     $legacyKeys
+     * @param list<CredentialRecord>      $webauthnKeys
+     * @param list<LegacyU2FKeyInterface> $legacyKeys
      */
     public function __construct(
         private readonly array $webauthnKeys = [],

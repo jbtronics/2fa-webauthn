@@ -27,8 +27,8 @@ final readonly class LegacyKey implements LegacyU2FKeyInterface
         return '';
     }
 
-    public function getCounter(): string
+    public function getCounter(): int
     {
-        return '0';
+        return 0;
     }
 }

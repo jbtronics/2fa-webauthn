@@ -7,27 +7,21 @@ namespace Jbtronics\TFAWebauthn\Model;
 /**
  * This interface is used to describe U2F key registrations which can be used for backwards compatibility.
  * If you have a legacy U2F key, you can implement this interface to allow users to use it for the new WebAuthn system.
- * This interface definition is based on TwoFactorKeyInterface from R/U2FTwoFactorBundle and therefore has no typing.
+ * This interface definition is based on TwoFactorKeyInterface from R/U2FTwoFactorBundle.
  */
 interface LegacyU2FKeyInterface
 {
     /**
-     * @return string
+     * The key handle, encoded as websafe base64.
      */
-    public function getKeyHandle();
+    public function getKeyHandle(): string;
 
     /**
-     * @return string
+     * The public key, encoded as standard base64.
      */
-    public function getPublicKey();
+    public function getPublicKey(): string;
 
-    /**
-     * @return string
-     */
-    public function getCertificate();
+    public function getCertificate(): string;
 
-    /**
-     * @return string
-     */
-    public function getCounter();
+    public function getCounter(): int;
 }

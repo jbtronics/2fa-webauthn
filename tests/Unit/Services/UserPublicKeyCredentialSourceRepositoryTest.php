@@ -10,6 +10,9 @@ use Jbtronics\TFAWebauthn\Tests\Fixtures\LegacyKey;
 use Jbtronics\TFAWebauthn\Tests\Fixtures\TestUser;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\User\InMemoryUser;
+use Symfony\Component\Uid\Uuid;
+use Webauthn\PublicKeyCredentialSource;
+use Webauthn\TrustPath\EmptyTrustPath;
 
 final class UserPublicKeyCredentialSourceRepositoryTest extends TestCase
 {
@@ -54,6 +57,15 @@ final class UserPublicKeyCredentialSourceRepositoryTest extends TestCase
 
         self::assertSame($second, $repository->findOneByCredentialId('second'));
         self::assertNull($repository->findOneByCredentialId('unknown'));
+    }
+
+    public function testLegacyPublicKeyCredentialSourceEntitiesAreStillAccepted(): void
+    {
+        // Entities written for 3.x extend the deprecated PublicKeyCredentialSource, which extends CredentialRecord
+        $legacyEntity = new PublicKeyCredentialSource('legacy-entity', 'public-key', [], 'none', new EmptyTrustPath(), Uuid::v4(), 'public-key-data', 'alice-id', 0);
+        $repository = new UserPublicKeyCredentialSourceRepository(Factory::security(new TestUser([$legacyEntity])));
+
+        self::assertSame($legacyEntity, $repository->findOneByCredentialId('legacy-entity'));
     }
 
     public function testFindAllForUserEntityReturnsCurrentUserKeys(): void
