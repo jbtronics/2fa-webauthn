@@ -65,8 +65,6 @@ readonly class TFAWebauthnRegistrationHelper
             PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_PS256),
             PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_PS384),
             PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_PS512),
-            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ED256),
-            PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_ED512),
             PublicKeyCredentialParameters::create('public-key', Algorithms::COSE_ALGORITHM_EDDSA),
         ];
 

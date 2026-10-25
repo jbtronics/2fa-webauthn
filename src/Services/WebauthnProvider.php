@@ -9,6 +9,7 @@ use Cose\Algorithm\Signature\ECDSA\ES256;
 use Cose\Algorithm\Signature\ECDSA\ES256K;
 use Cose\Algorithm\Signature\ECDSA\ES384;
 use Cose\Algorithm\Signature\ECDSA\ES512;
+use Cose\Algorithm\Signature\EdDSA\EdDSA;
 use Cose\Algorithm\Signature\RSA\PS256;
 use Cose\Algorithm\Signature\RSA\PS384;
 use Cose\Algorithm\Signature\RSA\PS512;
@@ -54,11 +55,11 @@ readonly class WebauthnProvider
 
         // Create the assertion response validator
         $extensionOutputCheckerHandler = new ExtensionOutputCheckerHandler();
-        $coseAlgorithmManager = $this->createAlgorithmManager();
 
         $csmFactory = new CeremonyStepManagerFactory();
         $csmFactory->setAttestationStatementSupportManager($attestationSupportStatementManager);
         $csmFactory->setExtensionOutputCheckerHandler($extensionOutputCheckerHandler);
+        $csmFactory->setAlgorithmManager($this->createAlgorithmManager());
 
         $creationCSM = $csmFactory->creationCeremony();
         $requestCSM = $csmFactory->requestCeremony();
@@ -72,7 +73,7 @@ readonly class WebauthnProvider
 
     private function createAlgorithmManager(): Manager
     {
-        return Manager::create()
+        $manager = Manager::create()
             ->add(
                 ES256::create(),
                 ES256K::create(),
@@ -87,6 +88,13 @@ readonly class WebauthnProvider
                 PS384::create(),
                 PS512::create(),
             );
+
+        // EdDSA (Ed25519) needs the sodium extension, which is enabled by default but can be missing
+        if (\extension_loaded('sodium')) {
+            $manager->add(new EdDSA());
+        }
+
+        return $manager;
     }
 
     private function addAttestationTypes(AttestationStatementSupportManager $attestationStatementSupportManager): void

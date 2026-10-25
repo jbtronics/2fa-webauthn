@@ -43,6 +43,7 @@ final class TFAWebauthnRegistrationHelperTest extends TestCase
         $algorithms = array_map(static fn ($parameters) => $parameters->alg, $options->pubKeyCredParams);
         self::assertContains(Algorithms::COSE_ALGORITHM_ES256, $algorithms);
         self::assertContains(Algorithms::COSE_ALGORITHM_EDDSA, $algorithms);
+        self::assertNotContains(Algorithms::COSE_ALGORITHM_ED256, $algorithms, 'non-standard algorithms are not offered');
 
         $stored = $this->storage->getActiveRegistrationRequest();
         self::assertNotNull($stored, 'the request is stored for validation');
