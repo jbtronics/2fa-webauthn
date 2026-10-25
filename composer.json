@@ -9,6 +9,11 @@
             "Jbtronics\\TFAWebauthn\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Jbtronics\\TFAWebauthn\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Jan Böhmer",
@@ -18,7 +23,9 @@
     "require": {
         "php": "^8.2",
         "ext-json": "*",
-        "symfony/framework-bundle": "^6.0|^7.0|^8.0",
+        "symfony/framework-bundle": "^6.4|^7.0|^8.0",
+        "symfony/security-bundle": "^6.4|^7.0|^8.0",
+        "symfony/twig-bundle": "^6.4|^7.0|^8.0",
         "scheb/2fa-bundle": "^6.0.0|^7.0.0|^8.0.0",
         "web-auth/webauthn-lib": "^5.2",
         "psr/log": "^3.0.0|^2.0.0",
@@ -27,7 +34,23 @@
         "symfony/uid": "^6.0|^7.0|^8.0"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest",
-        "phpunit/phpunit": "^9.5"
+        "friendsofphp/php-cs-fixer": "^3.89",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-symfony": "^2.0",
+        "phpunit/phpunit": "^11.5.2 || ^12.4",
+        "symfony/translation": "^6.4 || ^7.0 || ^8.0",
+        "symfony/yaml": "^6.4 || ^7.0 || ^8.0"
+    },
+    "scripts": {
+        "cs-check": "php-cs-fixer check --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "phpstan": "phpstan analyse",
+        "test": "phpunit",
+        "check": [
+            "@cs-check",
+            "@phpstan",
+            "@test"
+        ]
     }
 }
